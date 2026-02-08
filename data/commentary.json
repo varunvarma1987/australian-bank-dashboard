@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-02-08T00:00:00Z",
+  "roe": {
+    "emoji": "🏆",
+    "headline": "CBA Dominates with 13.5% ROE",
+    "body": "Commonwealth Bank continues to lead the peer group with a cash ROE of 13.5%, down just 10bps from FY24. This reflects CBA's superior pricing power, scale advantages, and the highest net interest margin among the majors. NAB sits second at 11.4%, while Macquarie's diversified model delivered 11.2%. Westpac's 9.7% is suppressed by elevated restructuring costs from its UNITE transformation. ANZ's reported 8.1% was heavily distorted by $1.1bn in significant items including a $585m restructuring charge and $271m ASIC settlement — excluding these, underlying returns were materially closer to peer levels.",
+    "leader": "CBA",
+    "laggard": "ANZ",
+    "peer_average": 10.78,
+    "spread_1_to_5": 5.4
+  },
+  "nim": {
+    "emoji": "📊",
+    "headline": "CBA's Margin Premium Widens to 2.08%",
+    "body": "CBA's NIM of 2.08% — up 9bps from FY24 — is the clear standout, reflecting higher earnings on capital and portfolio hedges despite intense mortgage competition. Westpac follows at 1.94% (down just 1bp), with its core NIM at 1.81% excluding Treasury & Markets. NAB's margin lifted 3bps to 1.74%, aided by Markets & Treasury income. ANZ's 1.55% reflects the drag from mortgage competition and the Suncorp Bank integration diluting margins. Macquarie's BFS division benefits from market-leading digital deposit growth, though as a diversified group, its NIM is not directly comparable to the pure retail banks.",
+    "leader": "CBA",
+    "laggard": "ANZ",
+    "peer_average": 1.86,
+    "spread_1_to_5": 0.53
+  },
+  "cti": {
+    "emoji": "⚡",
+    "headline": "CBA Stays Leanest at 45.5% Despite Investment Surge",
+    "body": "CBA's cost-to-income of 45.5% remains best in class, even as it hired 2,000+ engineers and boosted annual investment spend by $300m to $2.3bn. NAB reported approximately 47%, reflecting disciplined cost management despite increased digital platform investment. Macquarie's ~48.5% benefits from scalable fee-based revenue streams. Both Westpac (~53%) and ANZ (~53.2%) were materially impacted by large restructuring charges — $273m for Westpac's UNITE program and $585m for ANZ's headcount reduction. Underlying ratios for both are approximately 3-5 percentage points lower and expected to improve in FY26 as cost savings materialise.",
+    "leader": "CBA",
+    "laggard": "ANZ",
+    "peer_average": 49.44,
+    "spread_1_to_5": 7.7
+  },
+  "cet1": {
+    "emoji": "🛡️",
+    "headline": "All Banks Comfortably Above Regulatory Minimums",
+    "body": "Macquarie leads with CET1 of 12.8% (17.6% on a harmonised international basis), maintaining a $9.5bn capital surplus. Westpac's 12.5% — up 4bps despite a $581m buyback — provides $3.1bn above its new 11.25% target. CBA is at 12.3%, flat on FY24, while ANZ's 12.0% (pro-forma 12.26% after capital actions) reflects the Suncorp integration period. NAB's 11.7% is the lowest but still comfortably above APRA's 10.25% minimum. The sector's strong capital positions take on added significance as APRA phases out AT1 capital instruments from January 2027, requiring banks to hold more CET1 and Tier 2 capital.",
+    "leader": "MQG",
+    "laggard": "NAB",
+    "peer_average": 12.26,
+    "spread_1_to_5": 1.1
+  },
+  "overall_summary": "FY25 saw Australian bank profitability remain resilient despite intense competition and significant restructuring investments. CBA led across most metrics, reinforcing its position as the sector's premium franchise. Several banks took large one-off charges to position for future efficiency gains through technology transformation and AI adoption."
+}

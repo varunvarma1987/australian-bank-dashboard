@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Australian Banking FY25 Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-card: #111827;
+  --bg-card-hover: #1a2235;
+  --border: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-gold: #f59e0b;
+  --cba: #FFD700;
+  --nab: #E63946;
+  --anz: #3B82F6;
+  --wbc: #D5002B;
+  --mqg: #DADADA;
+  --positive: #10b981;
+  --negative: #ef4444;
+  --gradient-start: #0a0e17;
+  --gradient-end: #111827;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.noise-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* === HERO SECTION === */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(245,158,11,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(59,130,246,0.04) 0%, transparent 60%);
+}
+
+.hero-tag {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.2s forwards;
+  position: relative;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.4s forwards;
+  position: relative;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent-gold), #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.6s forwards;
+  position: relative;
+}
+
+.hero-banks {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.8s forwards;
+  position: relative;
+}
+
+.bank-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.bank-pill:hover {
+  transform: translateY(-2px);
+  border-color: var(--text-muted);
+}
+
+.bank-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 1s forwards;
+}
+
+.scroll-arrow {
+  width: 20px; height: 30px;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 10px;
+  position: relative;
+}
+
+.scroll-arrow::after {
+  content: '';
+  width: 3px; height: 6px;
+  background: var(--text-muted);
+  border-radius: 2px;
+  position: absolute;
+  top: 6px; left: 50%;
+  transform: translateX(-50%);
+  animation: scrollBounce 1.5s ease infinite;
+}
+
+/* === SECTIONS === */
+.section {
+  min-height: 100vh;
+  padding: 4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: start;
+  position: relative;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 700px;
+}
+
+.section-tag {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 0.75rem;
+}
+
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.section-header p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* === VIEW TOGGLE ICONS === */
+.view-toggle {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.view-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-muted);
+}
+
+.view-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-icon:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+}
+
+.view-icon.active {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  color: #0a0e17;
+}
+
+/* === KPI CARDS === */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 3rem;
+}
+
+.kpi-grid.hidden { display: none; }
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.kpi-card:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+}
+
+.kpi-card:hover::before { opacity: 1; }
+
+.kpi-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.kpi-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kpi-bank {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.kpi-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* === MINI BAR CHART === */
+.mini-bar-chart {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.mini-bar-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  transition: opacity 0.2s ease;
+}
+
+.mini-bar-row:last-child {
+  margin-bottom: 0;
+}
+
+.mini-bar-row:hover {
+  opacity: 0.8;
+}
+
+.mini-bar-row.selected .mini-bar-fill {
+  box-shadow: 0 0 10px currentColor;
+}
+
+.mini-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* === CHART CONTAINERS === */
+.chart-container {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.chart-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.chart-area {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chart-area svg {
+  display: block;
+}
+
+/* === LEGEND === */
+.legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend-swatch {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+}
+
+/* === COMMENTARY === */
+.commentary {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 2rem;
+}
+
+.commentary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--accent-gold);
+}
+
+.commentary-card h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.commentary-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* === TABLE === */
+.data-table-wrap {
+  width: 100%;
+  max-width: 1000px;
+  overflow-x: auto;
+  margin-top: 2rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table-wrap.hidden { display: none; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead th {
+  text-align: left;
+  padding: 0.75rem 0.8rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 0.85rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.bank-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-weight: 600;
+}
+
+.bank-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bank-fy {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.metric-best {
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--bg-primary);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+}
+
+.rank-badge.top { background: var(--accent-gold); color: var(--bg-primary); }
+
+/* === FOOTER === */
+.footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  border-top: 1px solid var(--border);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* === D3 STYLES === */
+.bar { transition: opacity 0.2s ease; }
+.bar:hover { opacity: 0.85; }
+.axis text { fill: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 11px; }
+.axis line, .axis path { stroke: var(--border); }
+.grid line { stroke: var(--border); stroke-dasharray: 2,4; }
+.grid path { display: none; }
+
+.tooltip-d3 {
+  position: fixed;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  line-height: 1.5;
+}
+
+.tooltip-d3 .tt-bank { font-weight: 600; margin-bottom: 2px; }
+.tooltip-d3 .tt-val { color: var(--accent-gold); font-weight: 600; }
+
+/* === ANIMATIONS === */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .section { padding: 3rem 1rem; }
+  .chart-container { padding: 1.25rem; border-radius: 14px; }
+  .kpi-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+  .kpi-card {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  .kpi-left { flex: 1.2; min-width: 0; }
+  .kpi-right { flex: 0.8; min-width: 0; }
+  .kpi-value { font-size: 1.5rem; }
+  .mini-bar-chart { width: 100%; }
+  .mini-bar-track { width: 100%; }
+  .hero-banks { gap: 0.75rem; }
+  .bank-pill { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+  .commentary-card { padding: 1rem 1.25rem; }
+
+  /* Compact table for mobile */
+  .data-table-wrap { max-width: 100%; }
+  table { font-size: 0.75rem; }
+  thead th { padding: 0.6rem 0.4rem; font-size: 0.65rem; }
+  tbody td { padding: 0.7rem 0.4rem; }
+  .bank-name-cell { gap: 0.15rem; }
+  .bank-fy { font-size: 0.65rem; }
+  .bank-dot { width: 6px; height: 6px; }
+}
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="tooltip-d3" id="tooltip"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Financial Year 2025 · Annual Comparison</div>
+  <h1>Australian Bank<br><span>Performance Dashboard</span></h1>
+  <p class="hero-subtitle">A comprehensive comparison of key financial metrics across Australia's Big Four banks and Macquarie Group for FY25.</p>
+  <div class="hero-banks">
+    <div class="bank-pill"><div class="bank-dot" style="background:var(--cba)"></div>CBA</div>
+    <div class="bank-pill"><div class="bank-dot" style="background:var(--nab)"></div>NAB</div>
+    <div class="bank-pill"><div class="bank-dot" style="background:var(--anz)"></div>ANZ</div>
+    <div class="bank-pill"><div class="bank-dot" style="background:var(--wbc)"></div>Westpac</div>
+    <div class="bank-pill"><div class="bank-dot" style="background:var(--mqg)"></div>Macquarie</div>
+  </div>
+  <div class="scroll-indicator">
+    <div class="scroll-arrow"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="section" id="overview">
+  <div class="section-header">
+    <div class="section-tag">Overview</div>
+    <h2>FY25 At a Glance</h2>
+    <p>Key performance indicators showing who leads across the critical metrics that matter to investors.</p>
+  </div>
+  <div class="view-toggle">
+    <div class="view-icon active" id="kpi-view-icon" title="Key Metrics View">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="3" width="12" height="3" rx="1.5" fill="currentColor"/>
+        <rect x="2" y="8.5" width="16" height="3" rx="1.5" fill="currentColor"/>
+        <rect x="2" y="14" width="8" height="3" rx="1.5" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="view-icon" id="table-view-icon" title="Table View">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <rect x="4" y="4" width="12" height="3" rx="1" fill="currentColor"/>
+        <line x1="6.5" y1="9" x2="6.5" y2="16" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="10.5" y1="9" x2="10.5" y2="16" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="16" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="4" y1="11.5" x2="16" y2="11.5" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="4" y1="14.5" x2="16" y2="14.5" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="data-table-wrap hidden">
+    <table id="summary-table"></table>
+  </div>
+</section>
+
+<!-- ROE -->
+<section class="section" id="roe-section">
+  <div class="section-header">
+    <div class="section-tag">Profitability</div>
+    <h2>Return on Equity</h2>
+    <p>ROE measures how effectively banks generate profit from shareholders' equity — the ultimate measure of capital efficiency.</p>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="chart-container">
+    <div class="chart-title">FY25 Cash ROE Comparison</div>
+    <div class="chart-subtitle">Cash basis, continuing operations</div>
+    <div class="chart-area" id="roe-chart"></div>
+  </div>
+  <div class="commentary">
+    <div class="commentary-card">
+      <h4>🏆 CBA Dominates with 13.5% ROE</h4>
+      <p>Commonwealth Bank continues to lead the peer group with a cash ROE of 13.5%, down just 10bps from FY24. This reflects CBA's superior pricing power, scale advantages, and the highest net interest margin among the majors. The premium is even more pronounced when including franking credit benefits. NAB sits second at 11.4%, while Macquarie's diversified model delivered 11.2%. ANZ's reported 8.1% ROE was heavily distorted by $1.1bn in significant items — excluding these, underlying returns were closer to peer levels.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NIM -->
+<section class="section" id="nim-section">
+  <div class="section-header">
+    <div class="section-tag">Margins</div>
+    <h2>Net Interest Margin</h2>
+    <p>NIM captures the spread between what banks earn on loans and pay on deposits — the core engine of bank profitability.</p>
+  </div>
+  <div class="chart-container">
+    <div class="chart-title">FY25 Net Interest Margin</div>
+    <div class="chart-subtitle">Group NIM including Treasury & Markets</div>
+    <div class="chart-area" id="nim-chart"></div>
+  </div>
+  <div class="commentary">
+    <div class="commentary-card">
+      <h4>📊 CBA's Margin Premium Widens to 2.08%</h4>
+      <p>CBA's NIM of 2.08% — up 9bps from FY24 — is the clear standout, reflecting higher earnings on capital and portfolio hedges. Westpac follows at 1.94% (down 1bp), with its core NIM at 1.81% when excluding Treasury & Markets. NAB's margin lifted 3bps to 1.74%, aided by Markets & Treasury income. ANZ's 1.55% NIM reflects the drag from intense mortgage competition and the Suncorp Bank integration diluting margins. Macquarie, as a diversified financial group, reports NIM differently — its BFS division benefits from digital deposit strength but faces different competitive dynamics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COST TO INCOME -->
+<section class="section" id="cti-section">
+  <div class="section-header">
+    <div class="section-tag">Efficiency</div>
+    <h2>Cost-to-Income Ratio</h2>
+    <p>Lower is better — this ratio shows how many cents of every dollar of revenue are consumed by operating costs.</p>
+  </div>
+  <div class="chart-container">
+    <div class="chart-title">FY25 Cost-to-Income Ratio</div>
+    <div class="chart-subtitle">Lower = more efficient · Includes notable items where reported</div>
+    <div class="chart-area" id="cti-chart"></div>
+  </div>
+  <div class="commentary">
+    <div class="commentary-card">
+      <h4>⚡ CBA Stays Leanest at 45.5% Despite Investment Surge</h4>
+      <p>CBA's cost-to-income of 45.5% remains the best in class, even as it hired 2,000+ engineers and boosted investment spend by $300m to $2.3bn. NAB reported ~47% (ex-notable items), reflecting disciplined cost management despite increased investment in digital platforms. Westpac's headline 53% cost-to-income was inflated by $273m in restructuring charges for its UNITE transformation program — excluding these, the underlying ratio was closer to 50%. ANZ's reported ratio of ~53% also included $585m in restructuring charges and ASIC settlement costs. Macquarie's compensation-to-income model makes direct comparison less meaningful, though its overall efficiency reflected the benefit of scalable fee-based revenue streams.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CET1 -->
+<section class="section" id="cet1-section">
+  <div class="section-header">
+    <div class="section-tag">Capital Strength</div>
+    <h2>CET1 Capital Ratio</h2>
+    <p>Common Equity Tier 1 ratio measures the bank's core capital buffers — the critical safety net above APRA's minimum requirements.</p>
+  </div>
+  <div class="chart-container">
+    <div class="chart-title">FY25 CET1 Capital Ratio vs APRA Minimum</div>
+    <div class="chart-subtitle">APRA Level 2 basis · Regulatory minimum 10.25% (shown as threshold)</div>
+    <div class="chart-area" id="cet1-chart"></div>
+  </div>
+  <div class="commentary">
+    <div class="commentary-card">
+      <h4>🛡️ All Banks Comfortably Above Regulatory Minimums</h4>
+      <p>Macquarie leads with a CET1 of 12.8% (or 17.6% on a harmonised basis), reflecting its conservative approach to capital management and $9.5bn capital surplus. Westpac sits at 12.5% — up 4bps despite a $581m buyback — providing $3.1bn of surplus capital above its new 11.25% target. CBA is at 12.3%, NAB at 11.7%, and ANZ at 12.0% (pro-forma 12.26% after capital actions). The sector's strong capital positions provide flexibility for further buybacks and dividends, particularly as APRA phases out AT1 capital instruments from January 2027.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p><strong>Data Sources:</strong> CBA FY25 (year ended 30 Jun 2025), NAB FY25 (year ended 30 Sep 2025), ANZ FY25 (year ended 30 Sep 2025), Westpac FY25 (year ended 30 Sep 2025), Macquarie FY25 (year ended 31 Mar 2025). All metrics are on a cash/continuing operations basis unless stated. CET1 ratios are APRA Level 2.</p>
+  <p style="margin-top:0.5rem">Built with D3.js · Dashboard designed for educational and analytical purposes only. Not financial advice.</p>
+</footer>
+
+<script>
+// === DATA ===
+const banks = [
+  { code: 'CBA', name: 'Commonwealth Bank', color: '#FFD700', fy: 'Jun 2025' },
+  { code: 'NAB', name: 'National Australia Bank', color: '#E63946', fy: 'Sep 2025' },
+  { code: 'ANZ', name: 'ANZ Banking Group', color: '#3B82F6', fy: 'Sep 2025' },
+  { code: 'WBC', name: 'Westpac Banking Corp', color: '#D5002B', fy: 'Sep 2025' },
+  { code: 'MQG', name: 'Macquarie Group', color: '#DADADA', fy: 'Mar 2025' }
+];
+
+const metrics = {
+  roe:  [13.5, 11.4, 8.1, 9.7, 11.2],
+  nim:  [2.08, 1.74, 1.55, 1.94, 1.80],
+  cti:  [45.5, 47.0, 53.2, 53.0, 48.5],
+  cet1: [12.3, 11.7, 12.0, 12.5, 12.8],
+  npat: [10252, 7091, 5787, 6990, 3715],
+  dividend_yield: [4.2, 5.3, 6.2, 5.7, 3.3]
+};
+
+// === TOOLTIP ===
+const tooltip = d3.select('#tooltip');
+
+function showTip(e, html) {
+  const x = e.clientX, y = e.clientY;
+  tooltip.html(html).style('opacity', 1)
+    .style('left', (x + 14) + 'px')
+    .style('top', (y - 10) + 'px');
+}
+function hideTip() { tooltip.style('opacity', 0); }
+
+// === LEGEND ===
+const legendEl = document.getElementById('legend');
+banks.forEach(b => {
+  legendEl.innerHTML += `<div class="legend-item"><div class="legend-swatch" style="background:${b.color}"></div>${b.code}</div>`;
+});
+
+// === VIEW TOGGLE ===
+let selectedBankIndex = null;
+const kpiViewIcon = document.getElementById('kpi-view-icon');
+const tableViewIcon = document.getElementById('table-view-icon');
+const kpiGrid = document.getElementById('kpi-grid');
+const tableWrap = document.querySelector('.data-table-wrap');
+
+kpiViewIcon.addEventListener('click', () => {
+  kpiViewIcon.classList.add('active');
+  tableViewIcon.classList.remove('active');
+  kpiGrid.classList.remove('hidden');
+  tableWrap.classList.add('hidden');
+});
+
+tableViewIcon.addEventListener('click', () => {
+  tableViewIcon.classList.add('active');
+  kpiViewIcon.classList.remove('active');
+  tableWrap.classList.remove('hidden');
+  kpiGrid.classList.add('hidden');
+});
+
+// === KPI CARD DATA ===
+const kpiDefinitions = [
+  {
+    title: 'Highest ROE',
+    genericTitle: 'ROE',
+    subtitle: 'Cash basis, continuing operations',
+    key: 'roe',
+    unit: '%',
+    formatValue: (v) => v + '%',
+    getBest: (data) => Math.max(...data)
+  },
+  {
+    title: 'Widest Margin',
+    genericTitle: 'Margin',
+    subtitle: 'Group NIM including Treasury & Markets',
+    key: 'nim',
+    unit: '%',
+    formatValue: (v) => v + '%',
+    getBest: (data) => Math.max(...data)
+  },
+  {
+    title: 'Best Efficiency',
+    genericTitle: 'Efficiency',
+    subtitle: 'Cost to Income',
+    key: 'cti',
+    unit: '%',
+    formatValue: (v) => v + '%',
+    getBest: (data) => Math.min(...data)
+  },
+  {
+    title: 'Strongest Capital',
+    genericTitle: 'Capital',
+    subtitle: 'CET1',
+    key: 'cet1',
+    unit: '%',
+    formatValue: (v) => v + '%',
+    getBest: (data) => Math.max(...data)
+  },
+  {
+    title: 'Largest Profit',
+    genericTitle: 'Profit',
+    subtitle: 'Cash NPAT ($m)',
+    key: 'npat',
+    unit: '',
+    formatValue: (v) => '$' + (v / 1000).toFixed(1) + 'B',
+    getBest: (data) => Math.max(...data)
+  },
+  {
+    title: 'Highest Dividend',
+    genericTitle: 'Dividend',
+    subtitle: 'Dividend yield',
+    key: 'dividend_yield',
+    unit: '%',
+    formatValue: (v) => v + '%',
+    getBest: (data) => Math.max(...data)
+  }
+];
+
+function createMiniBarChart(metricKey, metricData) {
+  const max = Math.max(...metricData);
+
+  // Create array of objects with bank index, value, and color
+  const bankBars = metricData.map((value, i) => ({
+    idx: i,
+    value: value,
+    color: banks[i].color
+  }));
+
+  // Sort by performance: descending for most metrics, ascending for CTI (lower is better)
+  bankBars.sort((a, b) => metricKey === 'cti' ? a.value - b.value : b.value - a.value);
+
+  return bankBars.map(bar => {
+    const percent = (bar.value / max) * 100;
+    return `
+      <div class="mini-bar-row" data-bank-idx="${bar.idx}" data-metric="${metricKey}">
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" style="width: ${Math.max(percent, 5)}%; background: ${bar.color};"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderKPICards() {
+  kpiGrid.innerHTML = '';
+
+  kpiDefinitions.forEach(kpi => {
+    const metricData = metrics[kpi.key];
+    const bestValue = kpi.getBest(metricData);
+    const displayValue = selectedBankIndex !== null
+      ? kpi.formatValue(metricData[selectedBankIndex])
+      : kpi.formatValue(bestValue);
+
+    const displayBank = selectedBankIndex !== null
+      ? banks[selectedBankIndex].code
+      : banks[metricData.indexOf(bestValue)].code;
+
+    const displayColor = selectedBankIndex !== null
+      ? banks[selectedBankIndex].color
+      : banks[metricData.indexOf(bestValue)].color;
+
+    const displayTitle = selectedBankIndex !== null
+      ? kpi.genericTitle
+      : kpi.title;
+
+    const card = document.createElement('div');
+    card.className = 'kpi-card';
+    card.innerHTML = `
+      <div class="kpi-left">
+        <div class="kpi-title">${displayTitle}</div>
+        <div class="kpi-value" style="color:${displayColor}">${displayValue}</div>
+        <div class="kpi-bank">${displayBank}</div>
+        <div class="kpi-subtitle">${kpi.subtitle}</div>
+      </div>
+      <div class="kpi-right">
+        <div class="mini-bar-chart">
+          ${createMiniBarChart(kpi.key, metricData)}
+        </div>
+      </div>
+    `;
+    kpiGrid.appendChild(card);
+  });
+
+  // Add click handlers to mini bars
+  document.querySelectorAll('.mini-bar-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      const bankIdx = parseInt(row.getAttribute('data-bank-idx'));
+
+      // Toggle selection
+      if (selectedBankIndex === bankIdx) {
+        selectedBankIndex = null;
+      } else {
+        selectedBankIndex = bankIdx;
+      }
+
+      // Re-render cards with updated selection
+      renderKPICards();
+    });
+  });
+
+  // Highlight selected bars
+  if (selectedBankIndex !== null) {
+    document.querySelectorAll(`.mini-bar-row[data-bank-idx="${selectedBankIndex}"]`).forEach(row => {
+      row.classList.add('selected');
+    });
+  }
+}
+
+renderKPICards();
+
+// === SUMMARY TABLE ===
+const table = document.getElementById('summary-table');
+
+// Calculate best values for each metric
+const bestNPAT = Math.max(...metrics.npat);
+const bestROE = Math.max(...metrics.roe);
+const bestNIM = Math.max(...metrics.nim);
+const bestCTI = Math.min(...metrics.cti); // Lower is better
+const bestCET1 = Math.max(...metrics.cet1);
+
+table.innerHTML = `
+  <thead><tr>
+    <th>Bank</th><th>Cash NPAT ($m)</th><th>ROE</th><th>NIM</th><th>C/I Ratio</th><th>CET1</th>
+  </tr></thead>
+  <tbody>${banks.map((b,i) => {
+    return `<tr>
+      <td>
+        <div class="bank-name-cell">
+          <div class="bank-name-row">
+            <div class="bank-dot" style="background:${b.color}"></div>${b.code}
+          </div>
+          <div class="bank-fy">${b.fy}</div>
+        </div>
+      </td>
+      <td class="${metrics.npat[i] === bestNPAT ? 'metric-best' : ''}">${metrics.npat[i].toLocaleString()}</td>
+      <td class="${metrics.roe[i] === bestROE ? 'metric-best' : ''}">${metrics.roe[i]}%</td>
+      <td class="${metrics.nim[i] === bestNIM ? 'metric-best' : ''}">${metrics.nim[i]}%</td>
+      <td class="${metrics.cti[i] === bestCTI ? 'metric-best' : ''}">${metrics.cti[i]}%</td>
+      <td class="${metrics.cet1[i] === bestCET1 ? 'metric-best' : ''}">${metrics.cet1[i]}%</td>
+    </tr>`;
+  }).join('')}</tbody>`;
+
+// === CHART BUILDER ===
+function buildBarChart(containerId, data, unit, options = {}) {
+  const container = document.getElementById(containerId);
+  const containerWidth = container.clientWidth || 700;
+  const isMobile = containerWidth < 500;
+
+  const margin = { top: 20, right: 30, bottom: 40, left: isMobile ? 45 : 55 };
+  const width = Math.max(containerWidth - margin.left - margin.right, 300);
+  const height = isMobile ? 260 : 340;
+
+  const svg = d3.select(`#${containerId}`).append('svg')
+    .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
+    .style('width', '100%')
+    .style('max-height', (height + margin.top + margin.bottom) + 'px')
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleBand()
+    .domain(banks.map(b => b.code))
+    .range([0, width])
+    .padding(0.35);
+
+  const maxVal = options.domainMax || d3.max(data) * 1.15;
+  const minVal = options.domainMin !== undefined ? options.domainMin : 0;
+
+  const y = d3.scaleLinear()
+    .domain([minVal, maxVal])
+    .range([height, 0]);
+
+  // Grid
+  svg.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-width).tickFormat(''));
+
+  // Threshold line
+  if (options.threshold) {
+    svg.append('line')
+      .attr('x1', 0).attr('x2', width)
+      .attr('y1', y(options.threshold)).attr('y2', y(options.threshold))
+      .attr('stroke', '#ef4444').attr('stroke-dasharray', '6,4').attr('stroke-width', 1.5);
+
+    svg.append('text')
+      .attr('x', width - 4).attr('y', y(options.threshold) - 6)
+      .attr('text-anchor', 'end')
+      .attr('fill', '#ef4444').attr('font-size', '10px')
+      .text(`APRA Min ${options.threshold}%`);
+  }
+
+  // Bars
+  svg.selectAll('.bar')
+    .data(data)
+    .join('rect')
+    .attr('class', 'bar')
+    .attr('x', (d, i) => x(banks[i].code))
+    .attr('width', x.bandwidth())
+    .attr('y', height)
+    .attr('height', 0)
+    .attr('rx', 6)
+    .attr('fill', (d, i) => banks[i].color)
+    .on('mousemove', (e, d) => {
+      const i = data.indexOf(d);
+      showTip(e, `<div class="tt-bank">${banks[i].name}</div><div class="tt-val">${d}${unit}</div>`);
+    })
+    .on('mouseleave', hideTip)
+    .transition()
+    .duration(800)
+    .delay((d, i) => i * 100)
+    .ease(d3.easeCubicOut)
+    .attr('y', d => y(d))
+    .attr('height', d => height - y(d));
+
+  // Value labels
+  svg.selectAll('.val-label')
+    .data(data)
+    .join('text')
+    .attr('class', 'val-label')
+    .attr('x', (d, i) => x(banks[i].code) + x.bandwidth() / 2)
+    .attr('y', d => y(d) - 8)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#e2e8f0')
+    .attr('font-size', isMobile ? '11px' : '13px')
+    .attr('font-weight', '600')
+    .attr('opacity', 0)
+    .text(d => d + unit)
+    .transition()
+    .duration(600)
+    .delay((d, i) => i * 100 + 400)
+    .attr('opacity', 1);
+
+  // Rank badges (show #1)
+  const bestIdx = options.lowerBetter
+    ? data.indexOf(Math.min(...data))
+    : data.indexOf(Math.max(...data));
+
+  svg.append('text')
+    .attr('x', x(banks[bestIdx].code) + x.bandwidth() / 2)
+    .attr('y', y(data[bestIdx]) - 24)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#f59e0b')
+    .attr('font-size', '14px')
+    .text('👑')
+    .attr('opacity', 0)
+    .transition().delay(1000).duration(400).attr('opacity', 1);
+
+  // X axis
+  svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(0,${height})`)
+    .call(d3.axisBottom(x).tickSize(0))
+    .select('.domain').remove();
+
+  // Y axis
+  svg.append('g')
+    .attr('class', 'axis')
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + unit))
+    .select('.domain').remove();
+}
+
+// === BUILD CHARTS ON SCROLL (Intersection Observer) ===
+const chartBuilt = {};
+
+function buildChartIfVisible(entry) {
+  const id = entry.target.id;
+  if (chartBuilt[id]) return;
+
+  if (id === 'roe-chart') { buildBarChart('roe-chart', metrics.roe, '%', { domainMin: 0 }); chartBuilt[id] = true; }
+  if (id === 'nim-chart') { buildBarChart('nim-chart', metrics.nim, '%', { domainMax: 2.5 }); chartBuilt[id] = true; }
+  if (id === 'cti-chart') { buildBarChart('cti-chart', metrics.cti, '%', { domainMin: 40, domainMax: 58, lowerBetter: true }); chartBuilt[id] = true; }
+  if (id === 'cet1-chart') { buildBarChart('cet1-chart', metrics.cet1, '%', { domainMin: 10, domainMax: 14, threshold: 10.25 }); chartBuilt[id] = true; }
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) buildChartIfVisible(e); });
+}, { threshold: 0.3 });
+
+['roe-chart', 'nim-chart', 'cti-chart', 'cet1-chart'].forEach(id => {
+  observer.observe(document.getElementById(id));
+});
+
+// === SCROLL FADE-IN FOR SECTIONS ===
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = 1;
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.section').forEach(s => {
+  s.style.opacity = 0;
+  s.style.transform = 'translateY(30px)';
+  s.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+  sectionObserver.observe(s);
+});
+</script>
+</body>
+</html>

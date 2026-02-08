@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "generated_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "fy_label": "FY26",
+    "notes": "CBA reports June FY, NAB/ANZ/WBC report September FY, Macquarie reports March FY. All metrics on cash/continuing operations basis. Macquarie is a diversified financial group — NIM and CTI not directly comparable to pure retail banks. Dividend yields calculated using approximate share prices at reporting dates."
+  },
+  "banks": [
+    {
+      "code": "CBA",
+      "name": "Commonwealth Bank of Australia",
+      "color": "#FFD700",
+      "fy_year": "FY26",
+      "fy_end_date": "2026-06-30",
+      "results_date": "2026-08-XX",
+      "source_url": "https://www.commbank.com.au/about-us/investors/results.html",
+      "metrics": {
+        "npat_m": 0,
+        "roe": 0.0,
+        "nim": 0.00,
+        "cti": 0.0,
+        "cet1": 0.0,
+        "eps": 0.0,
+        "dps": 0,
+        "dividend_yield": 0.0
+      },
+      "yoy_changes": {
+        "npat_pct": 0,
+        "roe_bps": 0,
+        "nim_bps": 0,
+        "cti_bps": null,
+        "cet1_bps": 0
+      },
+      "notes": "Add your FY26 commentary here."
+    },
+    {
+      "code": "NAB",
+      "name": "National Australia Bank",
+      "color": "#E63946",
+      "fy_year": "FY26",
+      "fy_end_date": "2026-09-30",
+      "results_date": "2026-11-XX",
+      "source_url": "https://www.nab.com.au/content/dam/nab/documents/reports/corporate/",
+      "metrics": {
+        "npat_m": 0,
+        "roe": 0.0,
+        "nim": 0.00,
+        "cti": 0.0,
+        "cet1": 0.0,
+        "eps": 0.0,
+        "dps": 0,
+        "dividend_yield": 0.0
+      },
+      "yoy_changes": {
+        "npat_pct": 0,
+        "roe_bps": 0,
+        "nim_bps": 0,
+        "cti_bps": null,
+        "cet1_bps": 0
+      },
+      "notes": "Add your FY26 commentary here."
+    },
+    {
+      "code": "ANZ",
+      "name": "ANZ Banking Group",
+      "color": "#3B82F6",
+      "fy_year": "FY26",
+      "fy_end_date": "2026-09-30",
+      "results_date": "2026-11-XX",
+      "source_url": "https://www.anz.com.au/newsroom/media/",
+      "metrics": {
+        "npat_m": 0,
+        "roe": 0.0,
+        "nim": 0.00,
+        "cti": 0.0,
+        "cet1": 0.0,
+        "eps": 0.0,
+        "dps": 0,
+        "dividend_yield": 0.0
+      },
+      "yoy_changes": {
+        "npat_pct": 0,
+        "roe_bps": 0,
+        "nim_bps": 0,
+        "cti_bps": null,
+        "cet1_bps": 0
+      },
+      "notes": "Add your FY26 commentary here."
+    },
+    {
+      "code": "WBC",
+      "name": "Westpac Banking Corporation",
+      "color": "#D5002B",
+      "fy_year": "FY26",
+      "fy_end_date": "2026-09-30",
+      "results_date": "2026-11-XX",
+      "source_url": "https://www.westpac.com.au/about-westpac/media/full-year-result/",
+      "metrics": {
+        "npat_m": 0,
+        "roe": 0.0,
+        "nim": 0.00,
+        "cti": 0.0,
+        "cet1": 0.0,
+        "eps": 0.0,
+        "dps": 0,
+        "dividend_yield": 0.0
+      },
+      "yoy_changes": {
+        "npat_pct": 0,
+        "roe_bps": 0,
+        "nim_bps": 0,
+        "cti_bps": 0,
+        "cet1_bps": 0
+      },
+      "notes": "Add your FY26 commentary here."
+    },
+    {
+      "code": "MQG",
+      "name": "Macquarie Group",
+      "color": "#DADADA",
+      "fy_year": "FY26",
+      "fy_end_date": "2026-03-31",
+      "results_date": "2026-05-XX",
+      "source_url": "https://www.macquarie.com/us/en/about/news/",
+      "metrics": {
+        "npat_m": 0,
+        "roe": 0.0,
+        "nim": 0.00,
+        "cti": 0.0,
+        "cet1": 0.0,
+        "eps": 0.0,
+        "dps": 0,
+        "dividend_yield": 0.0
+      },
+      "yoy_changes": {
+        "npat_pct": 0,
+        "roe_bps": 0,
+        "nim_bps": null,
+        "cti_bps": null,
+        "cet1_bps": 0
+      },
+      "notes": "Add your FY26 commentary here."
+    }
+  ],
+  "apra_cet1_minimum": 10.25,
+  "rankings": {
+    "roe": ["CBA", "NAB", "MQG", "WBC", "ANZ"],
+    "nim": ["CBA", "WBC", "MQG", "NAB", "ANZ"],
+    "cti": ["CBA", "NAB", "MQG", "WBC", "ANZ"],
+    "cet1": ["MQG", "WBC", "CBA", "ANZ", "NAB"],
+    "npat": ["CBA", "NAB", "WBC", "ANZ", "MQG"],
+    "dividend_yield": ["ANZ", "WBC", "NAB", "CBA", "MQG"]
+  }
+}
