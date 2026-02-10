@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Australian Banking FY25 Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -61,6 +62,33 @@ body {
   padding: 2rem;
   position: relative;
   scroll-snap-align: start;
+  overflow: hidden;
+}
+
+#globe-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-glass {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  border-radius: 24px;
+  background: rgba(10, 14, 23, 0.00);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  max-width: 640px;
+  width: calc(100% - 2rem);
 }
 
 .hero::before {
@@ -80,6 +108,7 @@ body {
   opacity: 0;
   animation: fadeUp 0.8s ease 0.2s forwards;
   position: relative;
+  z-index: 2;
 }
 
 .hero h1 {
@@ -92,12 +121,15 @@ body {
   opacity: 0;
   animation: fadeUp 0.8s ease 0.4s forwards;
   position: relative;
+  z-index: 2;
 }
 
 .hero h1 span {
   background: linear-gradient(135deg, var(--accent-gold), #fbbf24);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8))
+          drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
 }
 
 .hero-subtitle {
@@ -108,6 +140,7 @@ body {
   opacity: 0;
   animation: fadeUp 0.8s ease 0.6s forwards;
   position: relative;
+  z-index: 2;
 }
 
 .hero-banks {
@@ -119,6 +152,7 @@ body {
   opacity: 0;
   animation: fadeUp 0.8s ease 0.8s forwards;
   position: relative;
+  z-index: 2;
 }
 
 .bank-pill {
@@ -159,6 +193,7 @@ body {
   text-transform: uppercase;
   opacity: 0;
   animation: fadeUp 0.8s ease 1s forwards;
+  z-index: 2;
 }
 
 .scroll-arrow {
@@ -618,6 +653,12 @@ tbody tr:hover {
   .mini-bar-track { width: 100%; }
   .hero-banks { gap: 0.75rem; }
   .bank-pill { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+  .hero-glass {
+    padding: 1.75rem 1.25rem;
+    border-radius: 18px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(14px);
+  }
   .commentary-card { padding: 1rem 1.25rem; }
 
   /* Compact table for mobile */
@@ -637,16 +678,19 @@ tbody tr:hover {
 <div class="tooltip-d3" id="tooltip"></div>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-tag">Financial Year 2025 · Annual Comparison</div>
-  <h1>Australian Bank<br><span>Performance Dashboard</span></h1>
-  <p class="hero-subtitle">A comprehensive comparison of key financial metrics across Australia's Big Four banks and Macquarie Group for FY25.</p>
-  <div class="hero-banks">
+<section class="hero" id="hero-section">
+  <canvas id="globe-canvas"></canvas>
+  <div class="hero-glass">
+    <div class="hero-tag">Financial Year 2025 · Annual Comparison</div>
+    <h1>Australian Bank<br><span>Performance Dashboard</span></h1>
+    <p class="hero-subtitle">A comprehensive comparison of key financial metrics across Australia's Big Four banks and Macquarie Group for FY25.</p>
+    <div class="hero-banks">
     <div class="bank-pill"><div class="bank-dot" style="background:var(--cba)"></div>CBA</div>
     <div class="bank-pill"><div class="bank-dot" style="background:var(--nab)"></div>NAB</div>
     <div class="bank-pill"><div class="bank-dot" style="background:var(--anz)"></div>ANZ</div>
     <div class="bank-pill"><div class="bank-dot" style="background:var(--wbc)"></div>Westpac</div>
     <div class="bank-pill"><div class="bank-dot" style="background:var(--mqg)"></div>Macquarie</div>
+  </div>
   </div>
   <div class="scroll-indicator">
     <div class="scroll-arrow"></div>
@@ -1167,6 +1211,309 @@ document.querySelectorAll('.section').forEach(s => {
   s.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
   sectionObserver.observe(s);
 });
+
+// === THREE.JS GLOBE ===
+(function initGlobe() {
+  const canvas = document.getElementById('globe-canvas');
+  const hero = document.getElementById('hero-section');
+  if (!canvas || !hero) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  // Camera position set dynamically in resize()
+
+  // Lighting — warm gold tint to match the dashboard accent
+  const ambient = new THREE.AmbientLight(0x2a2015, 0.7);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0x8a7040, 0.8);
+  dirLight.position.set(-3, 2, 4);
+  scene.add(dirLight);
+  const rimLight = new THREE.DirectionalLight(0x3a3020, 0.3);
+  rimLight.position.set(3, -1, -2);
+  scene.add(rimLight);
+
+  // Simplified country outlines as [lon, lat] polylines
+  // Australia outline (simplified)
+  const australiaCoords = [
+    [113.1,-26.1],[114.1,-26.3],[114.1,-25.8],[113.6,-24.3],[113.9,-22.5],
+    [114.2,-22.3],[114.6,-21.8],[115.7,-21.5],[116.7,-20.7],[117.2,-20.7],
+    [118.8,-20.3],[119.8,-20.0],[121.5,-19.6],[123.3,-17.3],[123.6,-17.1],
+    [123.5,-16.6],[124.0,-16.4],[124.7,-15.4],[125.1,-15.0],[125.6,-14.2],
+    [126.0,-14.0],[126.7,-14.2],[127.3,-14.1],[128.2,-14.8],[128.7,-14.9],
+    [129.4,-14.4],[129.8,-14.6],[129.8,-13.6],[130.3,-13.3],[130.7,-12.7],
+    [131.0,-12.5],[131.7,-12.2],[132.0,-12.1],[132.4,-12.2],[133.0,-12.0],
+    [133.6,-12.2],[134.3,-12.0],[135.3,-12.3],[136.0,-12.4],[136.3,-12.0],
+    [136.2,-12.4],[136.7,-12.8],[136.0,-13.5],[135.5,-14.6],[135.5,-14.9],
+    [136.3,-15.5],[137.1,-15.9],[137.8,-16.2],[138.1,-16.7],[138.8,-16.8],
+    [139.1,-17.1],[139.5,-17.3],[140.5,-17.6],[140.9,-17.9],[141.0,-16.1],
+    [141.0,-12.8],[142.0,-10.9],[142.4,-10.7],[142.6,-10.7],[142.6,-10.9],
+    [142.9,-11.8],[143.2,-12.2],[143.5,-13.0],[143.6,-14.0],[144.0,-14.4],
+    [144.4,-14.5],[144.6,-14.2],[145.0,-14.9],[145.4,-15.1],[145.4,-16.3],
+    [146.0,-17.0],[146.3,-18.0],[146.3,-18.8],[146.7,-19.1],[147.1,-19.4],
+    [147.8,-19.7],[148.6,-20.2],[148.9,-20.5],[149.1,-21.0],[149.4,-21.8],
+    [149.7,-22.3],[150.1,-22.2],[150.6,-22.4],[150.7,-23.5],[151.2,-23.8],
+    [151.6,-24.0],[152.1,-24.6],[152.4,-25.0],[152.9,-25.5],[153.1,-26.1],
+    [153.2,-27.2],[153.6,-28.2],[153.6,-28.7],[153.1,-30.3],[152.9,-31.0],
+    [152.4,-32.0],[151.8,-32.9],[151.3,-33.6],[151.1,-34.0],[150.7,-35.0],
+    [150.3,-35.5],[150.0,-35.9],[149.9,-37.0],[150.0,-37.3],[149.5,-37.7],
+    [148.0,-37.6],[147.4,-38.2],[146.9,-38.7],[146.3,-39.0],[145.5,-38.9],
+    [145.0,-38.4],[144.5,-38.1],[144.0,-38.0],[143.5,-38.5],[142.5,-38.4],
+    [141.6,-38.4],[140.6,-38.0],[139.8,-37.0],[139.8,-36.6],[139.0,-35.7],
+    [138.5,-35.0],[138.2,-34.4],[137.8,-33.6],[137.4,-34.2],[137.0,-34.7],
+    [136.2,-35.1],[135.5,-35.0],[134.9,-33.8],[134.7,-33.3],[134.2,-33.2],
+    [131.1,-31.5],[129.0,-31.6],[127.3,-32.3],[126.1,-32.2],[124.0,-33.0],
+    [123.7,-33.9],[122.0,-33.9],[121.0,-33.8],[119.6,-34.0],[118.0,-33.7],
+    [116.7,-33.5],[115.7,-33.3],[115.3,-33.6],[115.0,-34.0],[115.1,-33.5],
+    [115.7,-32.7],[115.7,-31.8],[114.9,-30.6],[115.0,-29.5],[114.6,-28.7],
+    [114.1,-27.3],[113.1,-26.1]
+  ];
+
+  // Tasmania outline (part of Australia — styled the same gold)
+  const tasmaniaCoords = [
+    [145.0,-40.8],[145.5,-40.8],[146.0,-41.0],[146.3,-41.1],[146.8,-41.2],
+    [147.3,-41.1],[147.7,-41.1],[148.0,-40.9],[148.3,-41.1],[148.3,-41.5],
+    [148.2,-41.9],[148.0,-42.1],[147.9,-42.5],[147.8,-42.9],[148.0,-43.1],
+    [148.2,-43.3],[148.3,-43.5],[147.8,-43.3],[147.3,-43.2],[146.9,-43.5],
+    [146.1,-43.5],[145.7,-43.3],[145.3,-42.8],[145.0,-42.6],[144.7,-42.5],
+    [144.7,-42.0],[144.8,-41.6],[145.0,-41.2],[145.0,-40.8]
+  ];
+
+  // No other country outlines — only Australia highlighted
+
+  // Equirectangular → sphere position
+  function lonLatToVec3(lon, lat, r) {
+    const phi = (90 - lat) * Math.PI / 180;
+    const theta = (lon + 180) * Math.PI / 180;
+    return new THREE.Vector3(
+      -r * Math.sin(phi) * Math.cos(theta),
+       r * Math.cos(phi),
+       r * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  // Create line geometry from coordinate pairs
+  function createLine(coords, color, linewidth, radius) {
+    const points = coords.map(c => lonLatToVec3(c[0], c[1], radius));
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.5 });
+    return new THREE.Line(geometry, material);
+  }
+
+  // Globe sphere (dark body)
+  const globeGeo = new THREE.SphereGeometry(1, 64, 64);
+  const globeMat = new THREE.MeshPhongMaterial({
+    color: 0x0d1117,
+    emissive: 0x08060a,
+    specular: 0x28221a,
+    shininess: 25,
+    transparent: false,
+  });
+  const globe = new THREE.Mesh(globeGeo, globeMat);
+  scene.add(globe);
+
+  // Atmosphere ring (subtle warm gold glow matching title gradient)
+  const atmosGeo = new THREE.SphereGeometry(1.02, 64, 64);
+  const atmosMat = new THREE.ShaderMaterial({
+    vertexShader: `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      varying vec3 vNormal;
+      void main() {
+        float intensity = pow(0.62 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+        gl_FragColor = vec4(0.96, 0.62, 0.04, 1.0) * intensity * 0.3;
+      }`,
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true
+  });
+  const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+  scene.add(atmosphere);
+
+  // Container for all lines (will rotate together)
+  const linesGroup = new THREE.Group();
+  scene.add(linesGroup);
+
+  // Draw Australia highlighted in gold with fill effect
+  // Australia mainland outline as bright gold line
+  const ausLine = createLine(australiaCoords, 0xf5a623, 2, 1.003);
+  ausLine.material.opacity = 0.9;
+  linesGroup.add(ausLine);
+
+  // Tasmania outline as bright gold line (same style as mainland)
+  const tasLine = createLine(tasmaniaCoords, 0xf5a623, 2, 1.003);
+  tasLine.material.opacity = 0.9;
+  linesGroup.add(tasLine);
+
+  // Create a filled Australia mesh using shape extrusion on the sphere
+  // We'll use a triangulated mesh from the outline projected onto the sphere
+  function createCountryFill(coords, color, radius) {
+    // Create many points filling the interior by using a grid approach
+    // First find bounding box
+    let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
+    coords.forEach(c => {
+      minLon = Math.min(minLon, c[0]); maxLon = Math.max(maxLon, c[0]);
+      minLat = Math.min(minLat, c[1]); maxLat = Math.max(maxLat, c[1]);
+    });
+
+    // Point-in-polygon test (ray casting)
+    function pointInPoly(x, y, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0], yi = poly[i][1];
+        const xj = poly[j][0], yj = poly[j][1];
+        if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    }
+
+    // Generate triangulated mesh covering Australia
+    const positions = [];
+    const step = 0.8; // degree resolution
+    const innerPoints = [];
+
+    for (let lon = minLon; lon <= maxLon; lon += step) {
+      for (let lat = minLat; lat <= maxLat; lat += step) {
+        if (pointInPoly(lon, lat, coords)) {
+          innerPoints.push([lon, lat]);
+        }
+      }
+    }
+
+    // Create small quads for each interior point
+    const vertices = [];
+    const hs = step * 0.55; // slight overlap
+    innerPoints.forEach(([lon, lat]) => {
+      const p1 = lonLatToVec3(lon - hs, lat - hs, radius);
+      const p2 = lonLatToVec3(lon + hs, lat - hs, radius);
+      const p3 = lonLatToVec3(lon + hs, lat + hs, radius);
+      const p4 = lonLatToVec3(lon - hs, lat + hs, radius);
+      // Two triangles per quad
+      vertices.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+      vertices.push(p1.x, p1.y, p1.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z);
+    });
+
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geom.computeVertexNormals();
+
+    const mat = new THREE.MeshBasicMaterial({
+      color: color,
+      transparent: true,
+      opacity: 0.85,
+      side: THREE.DoubleSide
+    });
+    return new THREE.Mesh(geom, mat);
+  }
+
+  const ausFill = createCountryFill(australiaCoords, 0xf5a623, 1.004);
+  linesGroup.add(ausFill);
+
+  // Tasmania fill (same gold as mainland)
+  const tasFill = createCountryFill(tasmaniaCoords, 0xf5a623, 1.004);
+  linesGroup.add(tasFill);
+
+  // Australia glow (larger slightly transparent fill behind)
+  const ausGlow = createCountryFill(australiaCoords, 0xf5a623, 1.001);
+  ausGlow.material.opacity = 0.25;
+  linesGroup.add(ausGlow);
+
+  // Tasmania glow
+  const tasGlow = createCountryFill(tasmaniaCoords, 0xf5a623, 1.001);
+  tasGlow.material.opacity = 0.25;
+  linesGroup.add(tasGlow);
+
+  // Initial rotation to center Australia facing the camera
+  // In Three.js SphereGeometry: lon=0 is at -Z, so to bring lon to face +Z camera:
+  // rotY = -(lon * PI/180) + PI (negate because Y-rotation is counterclockwise)
+  // rotX = lat * PI/180 (positive lat = north, negative = south, tilt forward to show southern hemisphere)
+  const targetLon = 60;  // Australia center longitude
+  const targetLat = -25;  // Australia center latitude
+  const initRotY = -(targetLon * Math.PI / 180) + Math.PI;
+  const initRotX = targetLat * Math.PI / 180; // negative tilts south toward camera
+
+  globe.rotation.y = initRotY;
+  globe.rotation.x = initRotX;
+  atmosphere.rotation.y = initRotY;
+  atmosphere.rotation.x = initRotX;
+  linesGroup.rotation.y = initRotY;
+  linesGroup.rotation.x = initRotX;
+
+  // Sizing — globe scales dynamically with viewport
+  function resize() {
+    const w = hero.clientWidth;
+    const h = hero.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+
+    // Dynamic camera distance: globe fills ~60% of viewport on desktop, ~45% on mobile
+    // Larger viewport → closer camera → bigger globe
+    const minWidth = 320, maxWidth = 1400;
+    const minZ = 3.2, maxZ = 5.2; // closer = bigger globe, further = smaller
+    const t = Math.max(0, Math.min(1, (w - minWidth) / (maxWidth - minWidth)));
+    // Ease: starts small on mobile, grows on desktop
+    const cameraZ = maxZ - t * (maxZ - minZ);
+    camera.position.set(0, -0.15, cameraZ);
+    camera.lookAt(0, -0.15, 0);
+
+    camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Scroll-driven rotation
+  let scrollRotation = 0;
+  let currentScrollRotation = 0;
+  window.addEventListener('scroll', () => {
+    const heroRect = hero.getBoundingClientRect();
+    const heroH = hero.clientHeight;
+    // Only act while hero is visible
+    if (heroRect.bottom > 0 && heroRect.top < window.innerHeight) {
+      const progress = Math.max(0, Math.min(1, -heroRect.top / heroH));
+      scrollRotation = progress * 0.6; // Rotate up to ~35° on scroll
+    }
+  }, { passive: true });
+
+  // Subtle continuous idle rotation + glow pulse
+  let time = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.005;
+
+    // Smooth lerp toward scroll target
+    currentScrollRotation += (scrollRotation - currentScrollRotation) * 0.08;
+
+    // Idle rotation (very slow continuous spin)
+    const idleRot = time * 0.03;
+
+    const ry = initRotY + currentScrollRotation + idleRot;
+    const rx = initRotX + currentScrollRotation * 0.15;
+
+    globe.rotation.y = ry;
+    globe.rotation.x = rx;
+    atmosphere.rotation.y = ry;
+    atmosphere.rotation.x = rx;
+    linesGroup.rotation.y = ry;
+    linesGroup.rotation.x = rx;
+
+    // Subtle glow pulse on Australia + Tasmania
+    const pulse = 0.75 + Math.sin(time * 2) * 0.15;
+    ausFill.material.opacity = pulse;
+    tasFill.material.opacity = pulse;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
 </script>
 </body>
 </html>
