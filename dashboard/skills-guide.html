@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Skills Guide</title>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Lenis smooth scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FFF9FB;  /* Snow             */
+      --sage:      #4B88A2;  /* Air Force Blue   */
+      --vanilla:   #D3D4D9;  /* Alabaster Grey   */
+      --bronze:    #A8C4D0;  /* Air Force tint   */
+      --rose:      #BB0A21;  /* Brick Red        */
+      --text:      #252627;  /* Carbon Black     */
+      --nav-h:     60px;
+    }
+
+    html { scroll-behavior: auto; /* Lenis handles this */ }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Nav ──────────────────────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 32px;
+      transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    #nav.scrolled {
+      background: rgba(255, 249, 251, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 rgba(37, 38, 39, 0.08);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, font-weight 0.15s;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .nav-links a:hover { opacity: 1; }
+
+    .nav-links a.nav-active {
+      opacity: 1;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-active-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .nav-links a.nav-active .nav-active-dot {
+      display: inline-block;
+    }
+
+    /* Mobile nav */
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      #nav { padding: 0 20px; }
+    }
+
+    /* ── Page wrapper ─────────────────────────────────────────────── */
+    .page-wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Hero Section ─────────────────────────────────────────────── */
+    #hero {
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: calc(var(--nav-h) + 40px);
+      padding-bottom: 80px;
+    }
+
+    .hero-inner {
+      opacity: 0; /* GSAP will animate this in */
+    }
+
+    .hero-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 16px;
+    }
+
+    .hero-headline {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    .hero-subheadline {
+      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+      font-style: italic;
+      color: var(--sage);
+      font-weight: 400;
+      margin-bottom: 28px;
+      max-width: 620px;
+    }
+
+    .hero-subheadline em {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--sage);
+    }
+
+    .hero-what {
+      font-size: 2.15rem;
+      font-weight: 600;
+      color: #676982;
+      letter-spacing: 0.04em;
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+
+    .hero-body {
+      font-size: 1.05rem;
+      color: var(--text);
+      opacity: 0.75;
+      margin-bottom: 60px;
+      line-height: 1.75;
+    }
+
+    /* ── Comparison Widget ────────────────────────────────────────── */
+    .comparison-widget {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 680px) {
+      .comparison-widget { grid-template-columns: 1fr; }
+    }
+
+    .comp-card {
+      background: var(--vanilla);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(37, 38, 39, 0.08), 0 1px 4px rgba(37, 38, 39, 0.05);
+      overflow: hidden;
+      opacity: 0; /* GSAP animates in */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .comp-card .card-tag {
+      margin-top: auto;
+      padding-top: 14px;
+    }
+
+    .comp-card-label {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-without .comp-card-label { color: #BB0A21; }
+    .card-with    .comp-card-label { color: #4B88A2; }
+
+    .comp-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .card-without .comp-card-title { color: var(--text); }
+    .card-with    .comp-card-title { color: var(--text); }
+
+    /* ── Chat mock (Without Skills) ──────────────────────────────── */
+    .chat-mock {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-session {
+      background: rgba(255,255,255,0.55);
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(45,45,45,0.07);
+    }
+
+    .session-header {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.45;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .session-header::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--rose);
+      opacity: 0.7;
+      display: inline-block;
+    }
+
+    .typed-instruction {
+      font-size: 0.72rem;
+      color: var(--text);
+      opacity: 0.8;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.55;
+      height: 6.2em;
+      overflow: hidden;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--rose);
+      vertical-align: middle;
+      margin-left: 1px;
+      animation: blink 0.9s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .card-tag {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .tag-rose  { color: var(--rose); }
+    .tag-sage  { color: var(--sage); }
+
+    /* ── Skill File (With Skills) ─────────────────────────────────── */
+    .skill-file-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .skill-file-card {
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid var(--sage);
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      box-shadow: 0 0 0 0 rgba(75, 136, 162, 0);
+      animation: skill-pulse 2.8s ease-in-out infinite;
+    }
+
+    @keyframes skill-pulse {
+      0%   { box-shadow: 0 0 0 0   rgba(75, 136, 162, 0.55); }
+      50%  { box-shadow: 0 0 0 10px rgba(75, 136, 162, 0);   }
+      100% { box-shadow: 0 0 0 0   rgba(75, 136, 162, 0.55); }
+    }
+
+    .skill-file-icon {
+      width: 32px; height: 32px;
+      background: var(--sage);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+    }
+
+    .skill-file-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .skill-file-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .skill-file-meta {
+      font-size: 0.68rem;
+      color: var(--text);
+      opacity: 0.5;
+      margin-top: 1px;
+    }
+
+    .skill-arrow {
+      display: flex;
+      justify-content: center;
+      color: var(--sage);
+      opacity: 0.6;
+    }
+
+    .conv-bubbles {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .conv-bubble {
+      background: rgba(255,255,255,0.55);
+      border-radius: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(45,45,45,0.06);
+      font-size: 0.72rem;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(6px);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .conv-bubble-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--sage);
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .conv-bubble-text {
+      flex: 1;
+      opacity: 0.75;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conv-bubble-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      background: rgba(75, 136, 162,0.18);
+      color: var(--sage);
+      border-radius: 4px;
+      padding: 2px 5px;
+      flex-shrink: 0;
+    }
+
+    /* ── Divider ─────────────────────────────────────────────────── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(45,45,45,0.1), transparent);
+      margin: 80px 0;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       Section 2 — Benefits
+       ══════════════════════════════════════════════════════════════ */
+
+    #benefits {
+      padding: 80px 0 120px;
+    }
+
+    .subsection-gap {
+      margin-top: 120px;
+    }
+
+    /* ── Shared section text ──────────────────────────────────────── */
+    .section-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 10px;
+    }
+
+    .section-headline {
+      font-size: clamp(1.65rem, 3.5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      line-height: 1.12;
+      margin-bottom: 14px;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: rgba(37, 38, 39, 0.65);
+      max-width: 560px;
+      line-height: 1.75;
+      margin-bottom: 44px;
+    }
+
+    /* ── Context Window Visualizer ────────────────────────────────── */
+    .ctx-demo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 44px;
+    }
+
+    .ctx-window {
+      width: 100%;
+      max-width: 580px;
+      height: 440px;
+      border: 1.5px solid rgba(37, 38, 39, 0.11);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.38);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 28px rgba(37, 38, 39, 0.07);
+    }
+
+    .ctx-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(37, 38, 39, 0.07);
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .ctx-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(37, 38, 39, 0.45);
+    }
+
+    .ctx-tokens {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(37, 38, 39, 0.55);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .ctx-sysprompt {
+      flex-shrink: 0;
+      background: var(--rose);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+.ctx-sysprompt-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .ctx-sysprompt-size {
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .ctx-overflow-zone {
+      flex-shrink: 0;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px dashed rgba(187, 10, 33, 0.3);
+      background: rgba(187, 10, 33, 0.05);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .ctx-overflow-zone.visible { opacity: 1; }
+
+    .ctx-overflow-text {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--rose);
+    }
+
+    .ctx-chat-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 26%, black 42%);
+      mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 26%, black 42%);
+    }
+
+    .ctx-msgs-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 14px 8px;
+      will-change: transform;
+    }
+
+    .ctx-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .ctx-msg {
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 88%;
+    }
+
+    .ctx-msg-user {
+      background: var(--bronze);
+      color: #fff;
+      align-self: flex-end;
+    }
+
+    .ctx-msg-assistant {
+      background: var(--vanilla);
+      color: var(--text);
+      align-self: flex-start;
+    }
+
+    .ctx-evict-label {
+      font-size: 0.75rem;
+      color: rgba(37, 38, 39, 0.45);
+      opacity: 0;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .ctx-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      padding: 11px 24px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .ctx-btn:hover  { opacity: 0.82; transform: translateY(-1px); }
+    .ctx-btn:active { transform: translateY(0); opacity: 1; }
+
+    /* ── Callout box ──────────────────────────────────────────────── */
+    .callout-box {
+      background: var(--vanilla);
+      border-radius: 14px;
+      padding: 22px 28px;
+      border-left: 3px solid var(--sage);
+      box-shadow: 0 2px 14px rgba(37, 38, 39, 0.06);
+    }
+
+    .callout-box p {
+      font-size: 0.92rem;
+      line-height: 1.78;
+      color: rgba(37, 38, 39, 0.82);
+    }
+
+    /* ── Skill Grid ───────────────────────────────────────────────── */
+    .skill-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 44px;
+    }
+
+    .skill-chip {
+      background: #F5F7F9;
+      border-left: 3px solid var(--chip-accent, var(--sage));
+      border-radius: 10px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 5px rgba(37, 38, 39, 0.07);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: default;
+    }
+
+    .skill-chip:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 18px rgba(75, 136, 162, 0.25);
+    }
+
+    .skill-chip-icon {
+      display: flex;
+      align-items: center;
+      color: var(--chip-accent, var(--sage));
+      flex-shrink: 0;
+    }
+
+    .skill-chip-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    /* ── Skill counter ────────────────────────────────────────────── */
+    .skill-counter-wrap {
+      text-align: center;
+      padding-top: 8px;
+    }
+
+    .skill-counter-num {
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      line-height: 1;
+      display: inline;
+    }
+
+    .skill-counter-text {
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
+      color: rgba(37, 38, 39, 0.5);
+      font-weight: 500;
+    }
+
+    /* ── Accuracy Drop Chart ──────────────────────────────────────── */
+    .accuracy-chart-wrap {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    #accuracy-chart {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .chart-source {
+      font-size: 0.67rem;
+      color: rgba(37, 38, 39, 0.3);
+      text-align: right;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       Section 3 — Creating Skills
+       ══════════════════════════════════════════════════════════════ */
+
+    #creating { padding: 80px 0 120px; }
+
+    /* ── 3A: Skill File Viewer ────────────────────────────────────── */
+    .skill-viewer-wrap {
+      margin-bottom: 44px;
+    }
+
+    .skill-file-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 28px rgba(37,38,39,0.09);
+      border: 1.5px solid rgba(37,38,39,0.08);
+      min-width: 0;
+    }
+
+    .skill-file-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      background: rgba(37,38,39,0.04);
+      border-bottom: 1px solid rgba(37,38,39,0.08);
+    }
+
+    .skill-file-dots { display: flex; gap: 6px; }
+    .skill-file-dot  { width: 10px; height: 10px; border-radius: 50%; }
+    .skill-file-dot:nth-child(1) { background: #FF5F57; }
+    .skill-file-dot:nth-child(2) { background: #FEBC2E; }
+    .skill-file-dot:nth-child(3) { background: #28C840; }
+
+    .skill-file-name {
+      font-size: 0.75rem; font-weight: 600;
+      color: rgba(37,38,39,0.45);
+      font-family: 'SF Mono','Fira Code',monospace;
+    }
+
+    .skill-block {
+      padding: 14px 20px;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      border-bottom: 1px solid rgba(37,38,39,0.05);
+    }
+    .skill-block:last-child { border-bottom: none; }
+    .skill-block:hover, .skill-block.active { background: rgba(37,38,39,0.025); }
+
+    .skill-block[data-section="name"]         { border-left-color: var(--sage);    }
+    .skill-block[data-section="description"]  { border-left-color: var(--rose);    }
+    .skill-block[data-section="instructions"] { border-left-color: var(--bronze);  }
+    .skill-block[data-section="examples"]     { border-left-color: var(--vanilla); }
+
+    .skill-block-label {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .skill-block[data-section="name"]         .skill-block-label { color: var(--sage);   }
+    .skill-block[data-section="description"]  .skill-block-label { color: var(--rose);   }
+    .skill-block[data-section="instructions"] .skill-block-label { color: var(--bronze); }
+    .skill-block[data-section="examples"]     .skill-block-label { color: rgba(37,38,39,0.4); }
+
+    .skill-block-content {
+      font-size: 0.78rem;
+      font-family: 'SF Mono','Fira Code',monospace;
+      color: var(--text); line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .skill-tooltip {
+      width: 270px; flex-shrink: 0;
+      background: var(--text); color: var(--bg);
+      border-radius: 12px; padding: 18px 20px;
+      opacity: 0; pointer-events: none;
+      position: sticky; top: 80px;
+      box-shadow: 0 8px 32px rgba(37,38,39,0.18);
+    }
+    .skill-tooltip-title {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      opacity: 0.45; margin-bottom: 8px;
+    }
+    .skill-tooltip-body { font-size: 0.85rem; line-height: 1.65; opacity: 0.88; }
+
+    .skill-block-accordion {
+      font-size: 0.82rem; line-height: 1.65;
+      color: rgba(37,38,39,0.65);
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid rgba(37,38,39,0.08);
+    }
+
+    /* ── 3B: Folder Tree ──────────────────────────────────────────── */
+    .folder-tree-wrap {
+      background: var(--text); border-radius: 16px;
+      padding: 24px 28px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.82rem; color: rgba(255,249,251,0.82);
+      overflow-x: auto; margin-bottom: 44px;
+      box-shadow: 0 8px 40px rgba(37,38,39,0.18);
+      line-height: 1.85;
+    }
+
+    .tree-line { display: flex; align-items: center; white-space: nowrap; opacity: 0; }
+    .tree-prefix        { color: rgba(255,249,251,0.2); }
+    .tree-folder-name-t { color: rgba(255,249,251,0.88); font-weight: 600; }
+    .tree-file-name     { color: rgba(255,249,251,0.5); }
+    .tree-comment       { color: rgba(255,249,251,0.25); font-style: italic; margin-left: 8px; }
+
+    .tree-folder-header { cursor: pointer; }
+    .tree-folder-header:hover .tree-folder-name-t { opacity: 0.7; }
+
+    .tree-badge-t {
+      display: inline-block; font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.05em; border-radius: 4px; padding: 1px 6px;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .badge-public-t   { background: rgba(211,212,217,0.12); color: rgba(211,212,217,0.8); }
+    .badge-user-t     { background: rgba(75,136,162,0.25);  color: #7EC8E3; }
+    .badge-examples-t { background: rgba(168,196,208,0.15); color: var(--bronze); }
+
+    .tree-user-glow {
+      border-radius: 4px;
+      animation: tree-glow-pulse 2.6s ease-in-out infinite;
+    }
+    @keyframes tree-glow-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(75,136,162,0.6); }
+      50%     { box-shadow: 0 0 0 6px rgba(75,136,162,0); }
+    }
+
+    /* ── 3C: Stepper ──────────────────────────────────────────────── */
+    .stepper-wrap { display: flex; flex-direction: column; margin-bottom: 44px; }
+
+    .step-item { display: flex; gap: 24px; opacity: 0.28; transition: opacity 0.5s; }
+    .step-item.active { opacity: 1; }
+
+    .step-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 44px; }
+
+    .step-circle {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: #fff;
+      position: relative; z-index: 1;
+      transition: transform 0.35s ease; flex-shrink: 0;
+    }
+    .step-item.active .step-circle { transform: scale(1.1); }
+
+    .step-glow-ring {
+      position: absolute; inset: -6px; border-radius: 50%;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .step-item.active .step-glow-ring {
+      opacity: 1;
+      animation: step-glow-anim 2s ease-in-out infinite;
+    }
+    @keyframes step-glow-anim {
+      0%,100% { transform: scale(1);    opacity: 0.55; }
+      50%     { transform: scale(1.4);  opacity: 0; }
+    }
+
+    .step-connector {
+      width: 2px; flex: 1; min-height: 28px;
+      background: rgba(37,38,39,0.1); margin: 4px 0;
+      position: relative; overflow: hidden;
+    }
+    .step-connector-fill {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 0%; transition: height 0.7s ease;
+    }
+    .step-item:last-child .step-connector { display: none; }
+
+    .step-right { padding-bottom: 40px; flex: 1; min-width: 0; }
+    .step-item:last-child .step-right { padding-bottom: 0; }
+
+    .step-title {
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--text); margin-bottom: 10px; padding-top: 9px;
+    }
+    .step-note {
+      font-size: 0.82rem; color: rgba(37,38,39,0.5);
+      margin-top: 10px; font-style: italic;
+    }
+
+    .terminal-block {
+      background: var(--text); border-radius: 10px;
+      padding: 12px 18px; margin-top: 12px;
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.82rem; color: #A8C4D0;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .terminal-prompt { color: rgba(255,249,251,0.28); flex-shrink: 0; }
+
+    .mini-editor {
+      background: #fff; border-radius: 10px; overflow: hidden;
+      border: 1.5px solid rgba(37,38,39,0.09);
+      box-shadow: 0 3px 18px rgba(37,38,39,0.07);
+      margin-top: 12px;
+      font-family: 'SF Mono','Fira Code',monospace; font-size: 0.75rem;
+    }
+    .mini-editor-header {
+      background: rgba(37,38,39,0.04); padding: 8px 14px;
+      border-bottom: 1px solid rgba(37,38,39,0.07);
+      font-size: 0.67rem; font-weight: 600;
+      color: rgba(37,38,39,0.38); letter-spacing: 0.06em;
+    }
+    .mini-editor-body { padding: 12px 16px; line-height: 1.7; color: var(--text); white-space: pre; }
+    .me-key { color: var(--sage); font-weight: 700; display: block; }
+    .me-dim { color: rgba(37,38,39,0.35); }
+
+    .chat-mockup {
+      background: rgba(255,255,255,0.7); border-radius: 12px;
+      border: 1.5px solid rgba(37,38,39,0.09);
+      padding: 14px 16px; margin-top: 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .chat-user-msg {
+      background: var(--bronze); color: #fff;
+      border-radius: 10px 10px 2px 10px;
+      padding: 8px 12px; font-size: 0.8rem;
+      align-self: flex-end; max-width: 85%;
+    }
+    .chat-skill-tag {
+      font-size: 0.67rem; color: var(--sage);
+      background: rgba(75,136,162,0.1); border-radius: 5px;
+      padding: 3px 8px; align-self: flex-start;
+      font-family: 'SF Mono','Fira Code',monospace; font-weight: 600;
+    }
+    .chat-ai-msg {
+      background: var(--vanilla); color: var(--text);
+      border-radius: 10px 10px 10px 2px;
+      padding: 8px 12px; font-size: 0.8rem;
+      align-self: flex-start; max-width: 92%; line-height: 1.5;
+    }
+
+    /* ── 3D: Tips ─────────────────────────────────────────────────── */
+    .tips-card {
+      background: var(--vanilla); border-radius: 16px;
+      padding: 28px 32px; border-left: 4px solid var(--sage);
+    }
+    .tips-heading {
+      font-size: 0.82rem; font-weight: 800;
+      letter-spacing: 0.12em; color: var(--sage);
+      text-transform: uppercase; margin-bottom: 22px;
+    }
+    .tips-list { display: flex; flex-direction: column; gap: 14px; }
+    .tip-item { display: flex; align-items: flex-start; gap: 12px; opacity: 0; }
+    .tip-icon { color: var(--sage); flex-shrink: 0; margin-top: 1px; }
+    .tip-text { font-size: 0.88rem; color: rgba(37,38,39,0.78); line-height: 1.65; }
+    .tip-text strong { color: var(--text); font-weight: 700; }
+
+    /* ── 3B: Path Info ────────────────────────────────────────────── */
+    .path-info-wrap {
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .path-info-block {
+      background: rgba(75,136,162,0.05);
+      border-left: 3px solid var(--sage);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 22px;
+    }
+    .path-info-block.project {
+      border-left-color: var(--bronze);
+      background: rgba(168,196,208,0.07);
+    }
+    .path-info-block.app {
+      border-left-color: var(--rose);
+      background: rgba(187,10,33,0.04);
+    }
+    .path-info-title {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 12px;
+    }
+    .path-info-block.project .path-info-title { color: var(--bronze); }
+    .path-info-block.app .path-info-title { color: var(--rose); }
+    .path-info-os {
+      font-size: 0.78rem; margin-bottom: 6px;
+      color: rgba(37,38,39,0.65); display: flex; align-items: baseline; gap: 10px;
+    }
+    .path-info-os:last-of-type { margin-bottom: 0; }
+    .path-info-os-label {
+      font-size: 0.65rem; font-weight: 700;
+      color: rgba(37,38,39,0.38); min-width: 58px; flex-shrink: 0;
+    }
+    .path-info-os code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.74rem;
+      background: rgba(37,38,39,0.06);
+      padding: 2px 7px; border-radius: 4px;
+      color: var(--text);
+    }
+    .path-info-desc {
+      font-size: 0.85rem; line-height: 1.7;
+      color: rgba(37,38,39,0.68);
+    }
+    .path-info-desc code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      font-size: 0.78rem;
+      background: rgba(37,38,39,0.06);
+      padding: 1px 5px; border-radius: 4px;
+    }
+
+    /* ── Mobile ───────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      #benefits       { padding: 60px 0 80px; }
+      .subsection-gap { margin-top: 80px; }
+      .ctx-window     { height: 360px; }
+      .ctx-sysprompt  { height: 56px; }
+      .ctx-msg        { font-size: 0.72rem; padding: 6px 10px; }
+      .skill-chip     { padding: 8px 12px; }
+      .skill-chip-label { font-size: 0.75rem; }
+      #creating       { padding: 60px 0 80px; }
+      .folder-tree-wrap { font-size: 0.72rem; padding: 18px 16px; }
+      .step-circle    { width: 38px; height: 38px; font-size: 0.9rem; }
+      .step-right     { padding-bottom: 32px; }
+      .tips-card      { padding: 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────── -->
+  <nav id="nav">
+    <ul class="nav-links">
+      <li><a href="#hero" id="nav-link-hero"><span class="nav-active-dot"></span>Claude Skills</a></li>
+      <li><a href="#benefits" id="nav-link-benefits"><span class="nav-active-dot"></span>Benefits</a></li>
+      <li><a href="#creating" id="nav-link-creating"><span class="nav-active-dot"></span>Creating</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="page-wrap">
+      <div class="hero-inner">
+
+        <h1 class="hero-headline">Claude Skills</h1>
+
+        <p class="hero-subheadline">
+          Teach Claude how <em>you</em> work&nbsp;— once&nbsp;—<br>
+          and never repeat yourself.
+        </p>
+
+        <p class="hero-what">The WHAT</p>
+
+        <p class="hero-body">
+          Claude Skills are reusable instruction files that live alongside your conversations.
+          Instead of re-explaining your preferences, coding standards, or workflows every time,
+          you write a Skill once&nbsp;— and Claude reads it automatically whenever it's relevant.
+          Think of them as persistent expertise that Claude can tap into on demand.
+        </p>
+
+        <!-- Comparison widget -->
+        <div class="comparison-widget">
+
+          <!-- Without Skills -->
+          <div class="comp-card card-without" id="card-without">
+            <p class="comp-card-label">Without Skills</p>
+            <p class="comp-card-title">Re-type every time.</p>
+
+            <div class="chat-mock">
+              <!-- Session 1 -->
+              <div class="chat-session">
+                <div class="session-header">Conversation 1</div>
+                <div class="typed-instruction" id="typed-1"></div>
+              </div>
+              <!-- Session 2 -->
+              <div class="chat-session">
+                <div class="session-header">Conversation 2</div>
+                <div class="typed-instruction" id="typed-2"></div>
+              </div>
+            </div>
+
+            <p class="card-tag tag-rose">Every. Single. Time.</p>
+          </div>
+
+          <!-- With Skills -->
+          <div class="comp-card card-with" id="card-with">
+            <p class="comp-card-label">With Skills</p>
+            <p class="comp-card-title">Define once. Always inherited.</p>
+
+            <div class="skill-file-wrap">
+              <div class="skill-file-card">
+                <div class="skill-file-icon">
+                  <i data-lucide="file-text" style="width:16px;height:16px;stroke-width:2.5"></i>
+                </div>
+                <div class="skill-file-info">
+                  <div class="skill-file-name">coding-standards.md</div>
+                  <div class="skill-file-meta">Skill · always active</div>
+                </div>
+                <i data-lucide="check-circle-2" style="width:16px;height:16px;color:var(--sage);stroke-width:2.5"></i>
+              </div>
+
+              <div class="skill-arrow">
+                <i data-lucide="arrow-down" style="width:18px;height:18px;stroke-width:2.5"></i>
+              </div>
+
+              <div class="conv-bubbles" id="conv-bubbles">
+                <div class="conv-bubble" data-bubble="0">
+                  <span class="conv-bubble-dot"></span>
+                  <span class="conv-bubble-text">Conversation 1 — "Fix the auth bug"</span>
+                  <span class="conv-bubble-badge">✓ skill</span>
+                </div>
+                <div class="conv-bubble" data-bubble="1">
+                  <span class="conv-bubble-dot"></span>
+                  <span class="conv-bubble-text">Conversation 2 — "Add dark mode"</span>
+                  <span class="conv-bubble-badge">✓ skill</span>
+                </div>
+                <div class="conv-bubble" data-bubble="2">
+                  <span class="conv-bubble-dot"></span>
+                  <span class="conv-bubble-text">Conversation 3 — "Write unit tests"</span>
+                  <span class="conv-bubble-badge">✓ skill</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="card-tag tag-sage">Write once. Always active.</p>
+          </div>
+
+        </div><!-- /comparison-widget -->
+      </div><!-- /hero-inner -->
+    </div><!-- /page-wrap -->
+  </section>
+
+  <!-- ── Section 2: Benefits ────────────────────────────────────── -->
+  <section id="benefits">
+    <div class="page-wrap">
+
+      <!-- ── 2A: Skills vs System Prompts ─────────────────────── -->
+      <div class="s2-block" id="s2a">
+        <h2 class="section-headline">Unclog Your Context</h2>
+        <p class="hero-subheadline">Every token spent on instructions is a token stolen from your actual conversation.</p>
+        <p class="hero-what">The WHY</p>
+
+        <p class="hero-body">
+          System prompts are loaded into your conversation every single time you send a message. As your conversation grows, they compete with your actual messages for space in the context window. Skills are different — Claude reads the Skill file only when relevant, and the instructions don't bloat your context.
+        </p>
+
+        <!-- Context Window Visualizer -->
+        <div class="ctx-demo-wrap">
+          <div class="ctx-window" id="ctx-window">
+            <div class="ctx-header">
+              <span class="ctx-title">Context Window</span>
+            </div>
+            <div class="ctx-sysprompt" id="ctx-sysprompt">
+              <span class="ctx-sysprompt-label">System Prompt</span>
+              <span class="ctx-sysprompt-size">~120,000 tokens</span>
+            </div>
+            <div class="ctx-overflow-zone" id="ctx-overflow-zone">
+              <span class="ctx-overflow-text">↑ older messages lost to context</span>
+            </div>
+            <div class="ctx-chat-area" id="ctx-chat-area">
+              <div class="ctx-msgs-inner" id="ctx-msgs-inner">
+                <!-- Messages injected by JS -->
+              </div>
+            </div>
+          </div>
+          <p class="ctx-evict-label" id="ctx-evict-label">Messages scroll out of context as your conversation grows.</p>
+        </div>
+
+      </div>
+
+      <!-- ── 2C: Accuracy Drop Chart ───────────────────────────── -->
+      <div class="s2-block subsection-gap" id="s2c">
+        <h2 class="section-headline">A Fuller Context,<br>More Inaccurate the Response</h2>
+        <p class="hero-body">As context fills with stale history, unrelated content, and repeated instructions, model accuracy on retrieval tasks drops sharply — even with the largest windows.</p>
+
+        <div class="accuracy-chart-wrap">
+          <svg id="accuracy-chart" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <p class="chart-source">Source: OpenAI GPT-5.4 evals · MRCR v2 8-needle · March 2026</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Section 3: Creating Skills ───────────────────────────────── -->
+  <section id="creating">
+    <div class="page-wrap">
+
+      <!-- ── 3A: Anatomy of a Skill ────────────────────────────── -->
+      <div id="s3a">
+        <h2 class="section-headline">What's Inside a Skill?</h2>
+        <p class="hero-what">The HOW</p>
+        <p class="section-subtitle">A Skill is just a markdown file with a specific structure. Here's the blueprint.</p>
+
+        <div class="skill-viewer-wrap" id="skill-viewer-wrap">
+          <div class="skill-file-card">
+            <div class="skill-file-header">
+              <div class="skill-file-dots">
+                <div class="skill-file-dot"></div>
+                <div class="skill-file-dot"></div>
+                <div class="skill-file-dot"></div>
+              </div>
+              <span class="skill-file-name">SKILL.md</span>
+            </div>
+            <div class="skill-block" data-section="name">
+              <div class="skill-block-label">Skill Name</div>
+              <div class="skill-block-content">code-review-assistant</div>
+              <div class="skill-block-accordion">name (required):
+• kebab-case only
+• No spaces or capitals
+• Should match folder name</div>
+            </div>
+            <div class="skill-block" data-section="description">
+              <div class="skill-block-label">Description</div>
+              <div class="skill-block-content">Use this skill when the user asks for a code review,
+PR feedback, or wants to improve code quality.</div>
+              <div class="skill-block-accordion">description (required):
+• MUST include BOTH:
+  – What the skill does
+  – When to use it (trigger conditions)
+• Under 1024 characters
+• No XML tags (&lt; or &gt;)
+• Include specific tasks users might say
+• Mention file types if relevant</div>
+            </div>
+            <div class="skill-block" data-section="instructions">
+              <div class="skill-block-label">Instructions</div>
+              <div class="skill-block-content">- Check for security vulnerabilities first
+- Evaluate naming conventions and readability
+- Suggest performance improvements
+- Always explain why something should change
+- Use the project's existing patterns as reference</div>
+              <div class="skill-block-accordion">The actual expertise. Write these as if you're onboarding a brilliant new teammate. Be concrete, not vague.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 3B: Folder Structure ───────────────────────────────── -->
+      <div class="subsection-gap" id="s3b">
+        <h2 class="section-headline">The Skills Folder Structure</h2>
+        <p class="section-subtitle">Skills are stored in a specific directory that Claude automatically scans.</p>
+        <div class="folder-tree-wrap" id="folder-tree"><!-- built by JS --></div>
+
+        <div class="path-info-wrap">
+          <div class="path-info-block">
+            <div class="path-info-title">Personal / Universal Skills</div>
+            <div class="path-info-os">
+              <span class="path-info-os-label">macOS</span>
+              <code>/Users/&lt;your-username&gt;/.claude/skills/</code>
+            </div>
+            <div class="path-info-os">
+              <span class="path-info-os-label">Linux</span>
+              <code>/home/&lt;your-username&gt;/.claude/skills/</code>
+            </div>
+            <div class="path-info-os">
+              <span class="path-info-os-label">Windows</span>
+              <code>C:\Users\&lt;your-username&gt;\.claude\skills\</code>
+            </div>
+          </div>
+          <div class="path-info-block project">
+            <div class="path-info-title">Project Skills</div>
+            <div class="path-info-desc">Project skills (<code>&lt;repo&gt;/.claude/skills/</code>) live inside the repo. They follow the project — available to anyone who clones the repo. These are for project-specific conventions.</div>
+          </div>
+          <div class="path-info-block app">
+            <div class="path-info-title">Claude.ai App</div>
+            <div class="path-info-desc">When using the Claude app, upload skill files under <strong>Customisation</strong> in your account settings.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3C: Step by Step ───────────────────────────────────── -->
+      <div class="subsection-gap" id="s3c">
+        <h2 class="section-headline">Create Your First Skill in 3 Steps</h2>
+        <p class="section-subtitle">From zero to a working skill in under 2 minutes.</p>
+
+        <div class="stepper-wrap" id="stepper-wrap">
+          <!-- Step 1 -->
+          <div class="step-item" id="step-1">
+            <div class="step-left">
+              <div class="step-circle" style="background:var(--sage)">
+                <div class="step-glow-ring" style="border:2px solid var(--sage)"></div>
+                1
+              </div>
+              <div class="step-connector">
+                <div class="step-connector-fill" style="background:var(--sage)"></div>
+              </div>
+            </div>
+            <div class="step-right">
+              <div class="step-title">Create the folder</div>
+              <div class="terminal-block">
+                <span class="terminal-prompt">$</span>
+                <span>mkdir -p ~/.claude/skills/user/my-skill</span>
+              </div>
+              <p class="step-note">Name it something descriptive. One folder per skill.</p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-item" id="step-2">
+            <div class="step-left">
+              <div class="step-circle" style="background:var(--sage)">
+                <div class="step-glow-ring" style="border:2px solid var(--sage)"></div>
+                2
+              </div>
+              <div class="step-connector">
+                <div class="step-connector-fill" style="background:var(--sage)"></div>
+              </div>
+            </div>
+            <div class="step-right">
+              <div class="step-title">Write your SKILL.md</div>
+              <div class="mini-editor">
+                <div class="mini-editor-header">SKILL.md</div>
+                <div class="mini-editor-body"><span class="me-key">Skill Name:</span> [Your Skill Name]<span class="me-key">Description</span>Use this skill when [describe the trigger conditions].<span class="me-key">Instructions</span><span class="me-dim">- [Your specific instructions]
+- [Be concrete and actionable]
+- [Include examples of good output]</span></div>
+              </div>
+              <p class="step-note">The description field is critical — it's how Claude decides when to use your skill.</p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-item" id="step-3">
+            <div class="step-left">
+              <div class="step-circle" style="background:var(--sage)">
+                <div class="step-glow-ring" style="border:2px solid var(--sage)"></div>
+                3
+              </div>
+            </div>
+            <div class="step-right">
+              <div class="step-title">Use it</div>
+              <div class="chat-mockup">
+                <div class="chat-user-msg">Review this function for me</div>
+                <div class="chat-skill-tag">✨ Skill activated: my-skill</div>
+                <div class="chat-ai-msg">I'll review this using your code review skill. Checking security vulnerabilities first, then readability...</div>
+              </div>
+              <p class="step-note">Just start chatting. Claude reads the SKILL.md automatically when your request matches the description.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3D: Tips ───────────────────────────────────────────── -->
+      <div class="subsection-gap" id="s3d">
+        <div class="tips-card" id="tips-card">
+          <div class="tips-heading">Pro Tips</div>
+          <div class="tips-list">
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="target" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>Be specific in your Description</strong> — vague triggers mean Claude won't know when to activate the skill.</p>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="ruler" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>Keep instructions concise.</strong> Skills that are too long can themselves consume context.</p>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="flask-conical" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>Test your skill</strong> by asking Claude something that should trigger it, then something that shouldn't.</p>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="refresh-cw" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>Iterate.</strong> Your first version won't be perfect. Refine instructions based on Claude's actual responses.</p>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="folder-open" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>One skill per folder.</strong> Don't cram multiple purposes into a single SKILL.md.</p>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon"><i data-lucide="scissors" style="width:18px;height:18px;stroke-width:2"></i></span>
+              <p class="tip-text"><strong>Keep descriptions specific and non-overlapping.</strong> It's the best way to keep things efficient.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3E: One Skill, Ten Skills, A Hundred Skills ────────── -->
+      <div class="subsection-gap" id="s2b">
+        <h2 class="section-headline">One Skill, Ten Skills,<br>A Hundred Skills</h2>
+        <p class="section-subtitle">Skills are modular. Add as many as you need without trade-offs.</p>
+
+        <div class="skill-grid" id="skill-grid">
+          <!-- Chips injected by JS -->
+        </div>
+
+        <div class="skill-counter-wrap" id="skill-counter-wrap">
+          <span class="skill-counter-num" id="skill-counter">0</span><span class="skill-counter-text"> skills loaded — and counting.</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Scripts ──────────────────────────────────────────────────── -->
+  <script>
+  (function () {
+
+    /* ── Lucide icons ─────────────────────────────────────────── */
+    lucide.createIcons();
+
+    /* ── Lenis smooth scroll ──────────────────────────────────── */
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Let GSAP ScrollTrigger know about Lenis scroll
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.lagSmoothing(0);
+
+    /* ── Nav scroll effect ────────────────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* ── Active nav section indicator ────────────────────────── */
+    const navSections = [
+      { id: 'creating', link: document.getElementById('nav-link-creating') },
+      { id: 'benefits', link: document.getElementById('nav-link-benefits') },
+      { id: 'hero',     link: document.getElementById('nav-link-hero') },
+    ];
+
+    function updateActiveNav() {
+      const midY = window.innerHeight * 0.35;
+      let active = navSections[navSections.length - 1]; // default: hero
+      for (const s of navSections) {
+        const el = document.getElementById(s.id);
+        if (el && el.getBoundingClientRect().top <= midY) {
+          active = s;
+          break;
+        }
+      }
+      navSections.forEach(s => s.link && s.link.classList.remove('nav-active'));
+      active.link && active.link.classList.add('nav-active');
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+    updateActiveNav();
+
+    /* ── Hero fade-in on load ─────────────────────────────────── */
+    gsap.to('.hero-inner', {
+      opacity: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power3.out',
+      delay: 0.2,
+    });
+
+    /* ── Comparison cards scroll-triggered entrance ───────────── */
+    gsap.set('#card-without', { opacity: 0, y: 30 });
+    gsap.set('#card-with',    { opacity: 0, y: 30 });
+
+    ScrollTrigger.create({
+      trigger: '.comparison-widget',
+      start: 'top 80%',
+      onEnter: () => {
+        gsap.to('#card-without', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', delay: 0 });
+        gsap.to('#card-with',    { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out', delay: 0.15 });
+      },
+      once: true,
+    });
+
+    /* ── Typing animation (Without Skills) ───────────────────── */
+    const INSTRUCTION = `Always use TypeScript strict mode.
+Prefer named exports over defaults.
+Add JSDoc comments to all public APIs.
+Max line length: 100 chars.`;
+
+    function typeInto(el, text, speed, onDone) {
+      let i = 0;
+      el.textContent = '';
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      el.appendChild(cursor);
+
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          el.insertBefore(document.createTextNode(text[i]), cursor);
+          i++;
+        } else {
+          clearInterval(interval);
+          onDone && onDone();
+        }
+      }, speed);
+      return interval;
+    }
+
+    function clearEl(el) {
+      el.textContent = '';
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      el.appendChild(cursor);
+    }
+
+    // Looping typing sequence for the two chat sessions
+    let typingActive = false;
+
+    function runTypingLoop() {
+      const t1 = document.getElementById('typed-1');
+      const t2 = document.getElementById('typed-2');
+
+      clearEl(t1);
+      clearEl(t2);
+
+      // Type into session 1
+      typeInto(t1, INSTRUCTION, 28, () => {
+        // Pause, then "new conversation" — clear & retype in session 2
+        setTimeout(() => {
+          clearEl(t2);
+          typeInto(t2, INSTRUCTION, 28, () => {
+            // Pause, then reset and loop
+            setTimeout(() => {
+              if (typingActive) runTypingLoop();
+            }, 1800);
+          });
+        }, 900);
+      });
+    }
+
+    // Start typing only when cards are visible
+    ScrollTrigger.create({
+      trigger: '.comparison-widget',
+      start: 'top 85%',
+      onEnter: () => {
+        typingActive = true;
+        setTimeout(runTypingLoop, 400);
+      },
+      onLeaveBack: () => { typingActive = false; },
+      once: false,
+    });
+
+    /* ── Conversation bubbles (With Skills) ──────────────────── */
+    function animateBubbles() {
+      const bubbles = document.querySelectorAll('.conv-bubble');
+      bubbles.forEach((b, i) => {
+        gsap.to(b, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          delay: 0.3 + i * 0.22,
+          ease: 'power3.out',
+        });
+      });
+    }
+
+    ScrollTrigger.create({
+      trigger: '#card-with',
+      start: 'top 80%',
+      onEnter: animateBubbles,
+      once: true,
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       Section 2 — Scroll-triggered text fade-ups
+       ════════════════════════════════════════════════════════════ */
+
+    // Helper: fade-up a set of elements when their trigger enters view
+    function fadeUpGroup(triggerEl, selectors, baseDelay) {
+      selectors.forEach((sel, i) => {
+        const els = document.querySelectorAll(sel);
+        if (!els.length) return;
+        gsap.set(els, { opacity: 0, y: 24 });
+        ScrollTrigger.create({
+          trigger: triggerEl,
+          start: 'top 82%',
+          onEnter: () => gsap.to(els, {
+            opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
+            delay: baseDelay + i * 0.09,
+          }),
+          once: true,
+        });
+      });
+    }
+
+    fadeUpGroup('#s2a', ['#s2a .section-headline', '#s2a .hero-subheadline', '#s2a .hero-what', '#s2a .hero-body'], 0);
+    fadeUpGroup('#s2c', ['#s2c .section-headline', '#s2c .hero-body'], 0);
+    fadeUpGroup('#s2b', ['#s2b .section-eyebrow', '#s2b .section-headline', '#s2b .section-subtitle'], 0);
+
+    gsap.set('.ctx-demo-wrap', { opacity: 0, y: 28 });
+    ScrollTrigger.create({
+      trigger: '.ctx-demo-wrap', start: 'top 84%',
+      onEnter: () => gsap.to('.ctx-demo-wrap', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }),
+      once: true,
+    });
+
+
+    gsap.set('#skill-counter-wrap', { opacity: 0, y: 20 });
+    ScrollTrigger.create({
+      trigger: '#skill-counter-wrap', start: 'top 90%',
+      onEnter: () => gsap.to('#skill-counter-wrap', { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }),
+      once: true,
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       Section 2A — Context Window Visualizer (auto-loop)
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const INTERVAL   = 2200;  // ms between new messages
+
+      let msgCount    = 0;
+      let translateY  = 0;
+      let animRunning = false;
+      let evictShown  = false;
+      let loopId      = null;
+
+      const inner        = document.getElementById('ctx-msgs-inner');
+      const evictLabel   = document.getElementById('ctx-evict-label');
+      const overflowZone = document.getElementById('ctx-overflow-zone');
+
+      const userMsgs = [
+        'Can you refactor this function?',
+        'Add error handling here.',
+        'Write tests for this module.',
+        'Explain this regex pattern.',
+        'Optimize this SQL query.',
+        'Fix the TypeScript error.',
+        'Add logging to this service.',
+        'Review my API design.',
+        'Help with this edge case.',
+        'Simplify this component.',
+        'Debug this async issue.',
+        'Improve these error messages.',
+      ];
+
+      const assistMsgs = [
+        'Refactored with cleaner abstractions...',
+        'Added try/catch with typed errors...',
+        'Tests cover all critical paths...',
+        'Regex matches emails with subdomains...',
+        'Added index on user_id — 10× faster...',
+        'Null check was missing on line 42...',
+        'Added structured logging with IDs...',
+        'REST looks solid — add rate limiting...',
+        'Use a safe default for this edge case...',
+        'Simplified to a single pure function...',
+        'Unhandled rejection in Promise chain...',
+        'Messages now include context and fix steps...',
+      ];
+
+      function makePair(num) {
+        const idx  = (num - 1) % userMsgs.length;
+        const pair = document.createElement('div');
+        pair.className = 'ctx-pair';
+        const uMsg = document.createElement('div');
+        uMsg.className  = 'ctx-msg ctx-msg-user';
+        uMsg.textContent = `#${num}: ${userMsgs[idx]}`;
+        const aMsg = document.createElement('div');
+        aMsg.className  = 'ctx-msg ctx-msg-assistant';
+        aMsg.textContent = assistMsgs[idx];
+        pair.appendChild(uMsg);
+        pair.appendChild(aMsg);
+        return pair;
+      }
+
+      // Remove oldest pair from DOM, compensating translateY so no visual jump
+      function cleanupOldest() {
+        const pairs = inner.querySelectorAll('.ctx-pair');
+        if (pairs.length > 12) {
+          const oldest = pairs[0];
+          const h = oldest.offsetHeight + 6;
+          oldest.remove();
+          translateY += h;
+          gsap.set(inner, { y: translateY });
+        }
+      }
+
+      function reset() {
+        inner.innerHTML = '';
+        translateY  = 0;
+        msgCount    = 0;
+        evictShown  = false;
+        gsap.set(inner,       { y: 0 });
+        gsap.set(evictLabel,  { opacity: 0 });
+        overflowZone.classList.remove('visible');
+
+        // Pre-populate with 4 messages so the window looks like an ongoing convo
+        for (let i = 0; i < 4; i++) {
+          msgCount++;
+          inner.appendChild(makePair(msgCount));
+        }
+      }
+
+      function addMessage() {
+        if (!animRunning) return;
+
+        msgCount++;
+
+        const pair = makePair(msgCount);
+        gsap.set(pair, { opacity: 0 });
+        inner.appendChild(pair);
+
+        // Measure height now that it's in the DOM
+        const pairH = pair.offsetHeight + 6;
+
+        // Slide all messages upward
+        translateY -= pairH;
+        gsap.to(inner, { y: translateY, duration: 0.85, ease: 'power2.inOut' });
+
+        // Fade new pair in slightly after the slide starts
+        gsap.to(pair, { opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' });
+
+        // Reveal "out of context" indicator after 2nd new message
+        if (!evictShown && msgCount >= 6) {
+          evictShown = true;
+          overflowZone.classList.add('visible');
+          gsap.to(evictLabel, { opacity: 1, duration: 0.6, ease: 'power2.out' });
+        }
+
+        // DOM cleanup after animation settles
+        setTimeout(cleanupOldest, 1000);
+      }
+
+      ScrollTrigger.create({
+        trigger: '.ctx-demo-wrap',
+        start: 'top 85%',
+        onEnter: () => {
+          animRunning = true;
+          reset();
+          setTimeout(() => {
+            if (animRunning) loopId = setInterval(addMessage, INTERVAL);
+          }, 600);
+        },
+        onLeaveBack: () => {
+          animRunning = false;
+          if (loopId) { clearInterval(loopId); loopId = null; }
+        },
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 2C — Accuracy Drop Chart
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const DATA = [
+        { label: '4-8K',     val: 97.3 },
+        { label: '8-16K',    val: 93.1 },
+        { label: '16-32K',   val: 96.8 },
+        { label: '32-64K',   val: 90.2 },
+        { label: '64-128K',  val: 86.0 },
+        { label: '128-256K', val: 79.5 },
+        { label: '256-512K', val: 57.5 },
+        { label: '512K-1M',  val: 36.6 },
+      ];
+
+      const VW = 700, VH = 300;
+      const ML = 52, MR = 20, MT = 44, MB = 50;
+      const PW = VW - ML - MR;
+      const PH = VH - MT - MB;
+      const N  = DATA.length;
+      const xS = PW / (N - 1);
+
+      const X = i => ML + i * xS;
+      const Y = v => MT + PH - (v / 100) * PH;
+
+      const svg = document.getElementById('accuracy-chart');
+      const NS  = 'http://www.w3.org/2000/svg';
+
+      function se(tag, attrs, text) {
+        const e = document.createElementNS(NS, tag);
+        if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+        if (text  != null) e.textContent = text;
+        return e;
+      }
+
+      // ── Defs ───────────────────────────────────────────────────
+      const defs = se('defs');
+
+      // Line gradient: sage → amber → rose
+      const lg = se('linearGradient', { id: 'acc-lg', x1: '0%', y1: '0%', x2: '100%', y2: '0%' });
+      [['0%','#4B88A2'], ['52%','#E8901A'], ['100%','#BB0A21']].forEach(([o, c]) => {
+        const s = se('stop', { offset: o }); s.style.stopColor = c; lg.appendChild(s);
+      });
+      defs.appendChild(lg);
+
+      // Area gradient (under line, top to bottom)
+      const ag = se('linearGradient', { id: 'acc-ag', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
+      [['0%','rgba(75,136,162,0.12)'], ['100%','rgba(75,136,162,0)']].forEach(([o, c]) => {
+        const s = se('stop', { offset: o }); s.style.stopColor = c; ag.appendChild(s);
+      });
+      defs.appendChild(ag);
+      svg.appendChild(defs);
+
+      // ── Grid lines & Y labels ──────────────────────────────────
+      [25, 50, 75, 100].forEach(pct => {
+        const y = Y(pct);
+        svg.appendChild(se('line', { x1: ML, y1: y, x2: VW-MR, y2: y,
+          stroke: 'rgba(37,38,39,0.07)', 'stroke-width': '1', 'stroke-dasharray': '4,4' }));
+        svg.appendChild(se('text', { x: ML-7, y: y+4, 'text-anchor': 'end',
+          fill: 'rgba(37,38,39,0.38)', 'font-size': '11',
+          'font-family': 'SF Mono, Fira Code, monospace' }, pct + '%'));
+      });
+
+      // ── X labels & axis title ──────────────────────────────────
+      DATA.forEach((d, i) => {
+        svg.appendChild(se('text', { x: X(i), y: MT+PH+16, 'text-anchor': 'middle',
+          fill: 'rgba(37,38,39,0.42)', 'font-size': '10',
+          'font-family': 'SF Mono, Fira Code, monospace' }, d.label));
+      });
+      svg.appendChild(se('text', { x: ML+PW/2, y: VH-4, 'text-anchor': 'middle',
+        fill: 'rgba(37,38,39,0.3)', 'font-size': '10.5',
+        'font-family': 'SF Mono, Fira Code, monospace' }, 'Context window range (tokens)'));
+      svg.appendChild(se('text', { x: 12, y: MT + PH / 2, 'text-anchor': 'middle',
+        fill: 'rgba(37,38,39,0.3)', 'font-size': '10.5',
+        'font-family': 'SF Mono, Fira Code, monospace',
+        transform: `rotate(-90, 12, ${MT + PH / 2})` }, 'Model Accuracy'));
+
+      // ── Path points ────────────────────────────────────────────
+      const pathD = DATA.map((d, i) =>
+        `${i===0?'M':'L'} ${X(i).toFixed(1)},${Y(d.val).toFixed(1)}`).join(' ');
+
+      // Area fill
+      const areaPath = se('path', {
+        d: pathD + ` L ${X(N-1).toFixed(1)},${Y(0).toFixed(1)} L ${X(0).toFixed(1)},${Y(0).toFixed(1)} Z`,
+        fill: 'url(#acc-ag)', opacity: '0',
+      });
+      svg.appendChild(areaPath);
+
+      // Main line
+      const linePath = se('path', {
+        d: pathD, fill: 'none', stroke: 'url(#acc-lg)',
+        'stroke-width': '2.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+      });
+      svg.appendChild(linePath);
+
+      const totalLen = linePath.getTotalLength();
+      linePath.setAttribute('stroke-dasharray', totalLen);
+      linePath.setAttribute('stroke-dashoffset', totalLen);
+
+      // ── Data dots + value labels ───────────────────────────────
+      const LABEL_SET  = new Set([0, 4, 6, 7]);
+      const animItems  = []; // { el, delay }
+
+      DATA.forEach((d, i) => {
+        const cx   = X(i);
+        const cy   = Y(d.val);
+        const red  = i >= 6;
+        const fill = red ? '#BB0A21' : '#4B88A2';
+        const r    = LABEL_SET.has(i) ? '5' : '3.5';
+
+        const dot = se('circle', { cx, cy, r, fill, opacity: '0' });
+        svg.appendChild(dot);
+        animItems.push({ el: dot, delay: 0.2 + i * (1.5 / N) });
+
+        if (LABEL_SET.has(i)) {
+          // Label above for most points; below for i=0 to avoid clipping
+          const labelY = (i === 0) ? cy + 20 : cy - 14;
+          const lbl = se('text', { x: cx, y: labelY, 'text-anchor': 'middle',
+            fill, 'font-size': '12', 'font-weight': '700', 'font-family': 'inherit',
+            opacity: '0' }, d.val + '%');
+          svg.appendChild(lbl);
+          animItems.push({ el: lbl, delay: 1.1 + LABEL_SET.size * 0.05 });
+        }
+      });
+
+      // ── "↓ 61 pt drop" annotation ─────────────────────────────
+      const annX = X(7) + 8;
+      const annY = (Y(97.3) + Y(36.6)) / 2;
+      const annG = se('g', { opacity: '0' });
+      const annBox = se('rect', { x: annX - 4, y: annY - 30, width: 90, height: 38,
+        rx: '7', fill: 'rgba(187,10,33,0.06)', stroke: 'rgba(187,10,33,0.18)',
+        'stroke-width': '1' });
+      annG.appendChild(annBox);
+      annG.appendChild(se('text', { x: annX + 41, y: annY - 14, 'text-anchor': 'middle',
+        fill: '#BB0A21', 'font-size': '11', 'font-weight': '700',
+        'font-family': 'SF Mono, Fira Code, monospace' }, '↓ 61 pt drop'));
+      annG.appendChild(se('text', { x: annX + 41, y: annY + 2, 'text-anchor': 'middle',
+        fill: 'rgba(187,10,33,0.65)', 'font-size': '9.5',
+        'font-family': 'SF Mono, Fira Code, monospace' }, 'peak → 1M context'));
+      svg.appendChild(annG);
+
+      // ── Scroll-triggered animation ─────────────────────────────
+      gsap.set('#s2c .accuracy-chart-wrap', { opacity: 0, y: 24 });
+      gsap.set('#s2c .chart-source',        { opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: '#s2c',
+        start: 'top 78%',
+        onEnter: () => {
+          gsap.to('#s2c .accuracy-chart-wrap', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 });
+          gsap.to(linePath,  { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut', delay: 0.3 });
+          gsap.to(areaPath,  { opacity: 1, duration: 1.2, ease: 'power2.out', delay: 0.6 });
+          animItems.forEach(({ el, delay }) =>
+            gsap.to(el, { opacity: 1, duration: 0.35, ease: 'power2.out', delay: delay + 0.3 }));
+          gsap.to(annG,      { opacity: 1, duration: 0.5, ease: 'power2.out', delay: 2.1 });
+          gsap.to('#s2c .chart-source', { opacity: 1, duration: 0.4, ease: 'power2.out', delay: 2.2 });
+        },
+        once: true,
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 2B — Skill Grid + Counter
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const SKILLS = [
+        { icon: 'code-2',          label: 'Code Style' },
+        { icon: 'megaphone',       label: 'Tone of Voice' },
+        { icon: 'plug',            label: 'API Patterns' },
+        { icon: 'alert-triangle',  label: 'Error Handling' },
+        { icon: 'file-text',       label: 'Documentation' },
+        { icon: 'check-circle',    label: 'Testing' },
+        { icon: 'shield',          label: 'Security' },
+        { icon: 'rocket',          label: 'Deployment' },
+        { icon: 'database',        label: 'Database' },
+        { icon: 'eye',             label: 'Accessibility' },
+        { icon: 'zap',             label: 'Performance' },
+        { icon: 'globe',           label: 'Internationalization' },
+        { icon: 'presentation',    label: 'PPT' },
+        { icon: 'pen-line',        label: 'Commentary' },
+        { icon: 'type',            label: 'Fonts' },
+        { icon: 'palette',         label: 'Colour Palette' },
+        { icon: 'trending-up',     label: 'Financial Forecast' },
+      ];
+      const ACCENTS = ['var(--sage)', 'var(--bronze)', 'var(--rose)'];
+
+      const grid = document.getElementById('skill-grid');
+
+      SKILLS.forEach((skill, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'skill-chip';
+        chip.style.setProperty('--chip-accent', ACCENTS[i % ACCENTS.length]);
+        chip.innerHTML = `
+          <span class="skill-chip-icon">
+            <i data-lucide="${skill.icon}" style="width:16px;height:16px;stroke-width:2"></i>
+          </span>
+          <span class="skill-chip-label">${skill.label}</span>
+        `;
+        grid.appendChild(chip);
+      });
+
+      // Re-render icons for dynamically added chips
+      lucide.createIcons();
+
+      // Stagger entrance animation
+      gsap.set('.skill-chip', { opacity: 0, y: 18, scale: 0.94 });
+
+      ScrollTrigger.create({
+        trigger: '#s2b',
+        start: 'top 76%',
+        onEnter: () => {
+          gsap.to('.skill-chip', {
+            opacity: 1, y: 0, scale: 1,
+            duration: 0.45, stagger: 0.055, ease: 'power3.out',
+            onComplete: () => {
+              // Clear GSAP inline transforms so CSS :hover works cleanly
+              document.querySelectorAll('.skill-chip').forEach(el => {
+                gsap.set(el, { clearProps: 'transform,opacity' });
+              });
+            },
+          });
+
+          // Animated counter 0 → 12
+          const counterEl = document.getElementById('skill-counter');
+          const obj = { val: 0 };
+          gsap.to(obj, {
+            val: 17, duration: 1.5, ease: 'power2.out', delay: 0.35,
+            onUpdate: () => { counterEl.textContent = Math.round(obj.val); },
+          });
+        },
+        once: true,
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 3 — Scroll-triggered text fade-ups
+       ════════════════════════════════════════════════════════════ */
+
+    fadeUpGroup('#s3a', ['#s3a .hero-what', '#s3a .section-headline', '#s3a .section-subtitle'], 0);
+    fadeUpGroup('#s3b', ['#s3b .section-headline', '#s3b .section-subtitle'], 0);
+    fadeUpGroup('#s3c', ['#s3c .section-headline', '#s3c .section-subtitle'], 0);
+
+    gsap.set('#skill-viewer-wrap', { opacity: 0, y: 28 });
+    ScrollTrigger.create({
+      trigger: '#skill-viewer-wrap', start: 'top 84%',
+      onEnter: () => gsap.to('#skill-viewer-wrap', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }),
+      once: true,
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       Section 3A — Skill File Block Interactions
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const blocks = document.querySelectorAll('.skill-block');
+      let current  = null;
+
+      function activate(block) {
+        const same = current === block;
+        if (current) current.classList.remove('active');
+        if (same) { current = null; return; }
+        block.classList.add('active');
+        current = block;
+      }
+
+      blocks.forEach(b => {
+        b.addEventListener('mouseenter', () => activate(b));
+        b.addEventListener('mouseleave', () => {
+          b.classList.remove('active');
+          if (current === b) current = null;
+        });
+        b.addEventListener('click', () => activate(b));
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 3B — Folder Tree
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const cont = document.getElementById('folder-tree');
+      const allAnimatable = [];
+
+      function mkLine(html, cls) {
+        const d = document.createElement('div');
+        d.className = 'tree-line' + (cls ? ' ' + cls : '');
+        d.innerHTML = html;
+        return d;
+      }
+
+      // Root
+      const rootLine = mkLine('<span style="color:rgba(255,249,251,0.4)">📁 /mnt/skills/</span>');
+      cont.appendChild(rootLine);
+      allAnimatable.push(rootLine);
+
+      const FOLDERS = [
+        {
+          id: 'pub', prefix: '├── ', name: 'public', glow: false,
+          badge: '<span class="tree-badge-t badge-public-t">Pre-built · Read-only</span>',
+          comment: '<span class="tree-comment"> ← Built-in skills (read-only)</span>',
+          children: [
+            ['│   ├── ', '📁 docx/',            '│   │   └── '],
+            ['│   ├── ', '📁 pdf/',             '│   │   └── '],
+            ['│   ├── ', '📁 xlsx/',            '│   │   └── '],
+            ['│   ├── ', '📁 pptx/',            '│   │   └── '],
+            ['│   └── ', '📁 frontend-design/', '│       └── '],
+          ],
+        },
+        {
+          id: 'usr', prefix: '├── ', name: 'user', glow: true,
+          badge: '<span class="tree-badge-t badge-user-t">Your custom skills go here!</span>',
+          comment: '<span class="tree-comment"> ← Your workspace</span>',
+          children: [
+            ['│   ├── ', '📁 code-review/',  '│   │   └── '],
+            ['│   └── ', '📁 my-api-style/', '│       └── '],
+          ],
+        },
+        {
+          id: 'ex', prefix: '└── ', name: 'examples', glow: false,
+          badge: '<span class="tree-badge-t badge-examples-t">Reference examples</span>',
+          comment: '<span class="tree-comment"> ← Learn from these</span>',
+          children: [
+            ['    └── ', '📁 skill-creator/', '        └── '],
+          ],
+        },
+      ];
+
+      const groups = {};
+
+      FOLDERS.forEach(f => {
+        const nameHtml = f.glow
+          ? `<span class="tree-user-glow"><span class="tree-folder-name-t">📁 ${f.name}/</span></span>`
+          : `<span class="tree-folder-name-t">📁 ${f.name}/</span>`;
+
+        const header = mkLine(
+          `<span class="tree-prefix">${f.prefix}</span>${nameHtml}${f.badge}${f.comment}`,
+          'tree-folder-header'
+        );
+        header.dataset.group = f.id;
+        cont.appendChild(header);
+        allAnimatable.push(header);
+
+        const childLines = [];
+        f.children.forEach(([p1, folder, p2]) => {
+          const r1 = mkLine(`<span class="tree-prefix">${p1}</span><span class="tree-folder-name-t">${folder}</span>`);
+          const r2 = mkLine(`<span class="tree-prefix">${p2}</span><span class="tree-file-name">📄 SKILL.md</span>`);
+          cont.appendChild(r1);
+          cont.appendChild(r2);
+          childLines.push(r1, r2);
+          allAnimatable.push(r1, r2);
+        });
+
+        groups[f.id] = { lines: childLines, open: true };
+
+        header.addEventListener('click', () => {
+          if (!treeAnimated) return;
+          const g = groups[f.id];
+          if (g.open) {
+            gsap.to(g.lines, { opacity: 0, duration: 0.2, stagger: 0.02, ease: 'power2.in',
+              onComplete: () => g.lines.forEach(l => { l.style.visibility = 'hidden'; l.style.height = '0'; l.style.overflow = 'hidden'; }) });
+          } else {
+            g.lines.forEach(l => { l.style.visibility = ''; l.style.height = ''; l.style.overflow = ''; });
+            gsap.fromTo(g.lines, { opacity: 0 }, { opacity: 1, duration: 0.25, stagger: 0.04, ease: 'power2.out' });
+          }
+          g.open = !g.open;
+        });
+      });
+
+      gsap.set(allAnimatable, { opacity: 0, x: -12 });
+      let treeAnimated = false;
+
+      ScrollTrigger.create({
+        trigger: '#folder-tree', start: 'top 82%',
+        onEnter: () => {
+          if (treeAnimated) return;
+          treeAnimated = true;
+          gsap.to(allAnimatable, { opacity: 1, x: 0, duration: 0.3, stagger: 0.045, ease: 'power2.out' });
+        },
+        once: true,
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 3C — Stepper
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      const stepEls = [
+        document.getElementById('step-1'),
+        document.getElementById('step-2'),
+        document.getElementById('step-3'),
+      ];
+      let lastActive = -1;
+
+      function activateUpTo(idx) {
+        if (idx <= lastActive) return;
+        lastActive = idx;
+        for (let i = 0; i <= idx; i++) {
+          stepEls[i].classList.add('active');
+          if (i > 0) {
+            const fill = stepEls[i - 1].querySelector('.step-connector-fill');
+            if (fill) fill.style.height = '100%';
+          }
+        }
+      }
+
+      stepEls.forEach((el, i) => {
+        ScrollTrigger.create({
+          trigger: el, start: 'top 72%',
+          onEnter: () => activateUpTo(i),
+          once: true,
+        });
+      });
+    })();
+
+    /* ════════════════════════════════════════════════════════════
+       Section 3D — Tips stagger
+       ════════════════════════════════════════════════════════════ */
+    (function () {
+      gsap.set('#tips-card', { opacity: 0, y: 22 });
+      gsap.set('.tip-item', { y: 14 });
+
+      ScrollTrigger.create({
+        trigger: '#s3d', start: 'top 84%',
+        onEnter: () => {
+          gsap.to('#tips-card', { opacity: 1, y: 0, duration: 0.55, ease: 'power3.out' });
+          gsap.to('.tip-item', { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: 'power2.out', delay: 0.25 });
+        },
+        once: true,
+      });
+
+      lucide.createIcons();
+    })();
+
+  })();
+  </script>
+
+</body>
+</html>
