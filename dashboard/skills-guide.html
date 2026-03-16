@@ -423,7 +423,7 @@
        ══════════════════════════════════════════════════════════════ */
 
     #benefits {
-      padding: 80px 0 120px;
+      padding: 80px 0 32px;
     }
 
     .subsection-gap {
@@ -1029,7 +1029,7 @@
 
     /* ── Mobile ───────────────────────────────────────────────────── */
     @media (max-width: 600px) {
-      #benefits       { padding: 60px 0 80px; }
+      #benefits       { padding: 60px 0 24px; }
       .subsection-gap { margin-top: 80px; }
       .ctx-window     { height: 360px; }
       .ctx-sysprompt  { height: 56px; }
@@ -1188,7 +1188,7 @@
 
       <!-- ── 2C: Accuracy Drop Chart ───────────────────────────── -->
       <div class="s2-block subsection-gap" id="s2c">
-        <h2 class="section-headline">A Fuller Context,<br>More Inaccurate the Response</h2>
+        <h2 class="section-headline">Too Much Context,<br>More Inaccurate the Response</h2>
         <p class="hero-body">As context fills with stale history, unrelated content, and repeated instructions, model accuracy on retrieval tasks drops sharply — even with the largest windows.</p>
 
         <div class="accuracy-chart-wrap">
@@ -1263,7 +1263,7 @@ PR feedback, or wants to improve code quality.</div>
 
         <div class="path-info-wrap">
           <div class="path-info-block">
-            <div class="path-info-title">Personal / Universal Skills</div>
+            <div class="path-info-title">Personal</div>
             <div class="path-info-os">
               <span class="path-info-os-label">macOS</span>
               <code>/Users/&lt;your-username&gt;/.claude/skills/</code>
@@ -1309,7 +1309,7 @@ PR feedback, or wants to improve code quality.</div>
               <div class="step-title">Create the folder</div>
               <div class="terminal-block">
                 <span class="terminal-prompt">$</span>
-                <span>mkdir -p ~/.claude/skills/user/my-skill</span>
+                <span>mkdir -p ~/.claude/skills/my-skill</span>
               </div>
               <p class="step-note">Name it something descriptive. One folder per skill.</p>
             </div>
@@ -1366,7 +1366,7 @@ PR feedback, or wants to improve code quality.</div>
           <div class="tips-list">
             <div class="tip-item">
               <span class="tip-icon"><i data-lucide="target" style="width:18px;height:18px;stroke-width:2"></i></span>
-              <p class="tip-text"><strong>Be specific in your Description</strong> — vague triggers mean Claude won't know when to activate the skill.</p>
+              <p class="tip-text"><strong>Add specific descriptions and non-overlapping</strong> vague triggers mean Claude won't know when to activate the skill.</p>
             </div>
             <div class="tip-item">
               <span class="tip-icon"><i data-lucide="ruler" style="width:18px;height:18px;stroke-width:2"></i></span>
@@ -1384,10 +1384,7 @@ PR feedback, or wants to improve code quality.</div>
               <span class="tip-icon"><i data-lucide="folder-open" style="width:18px;height:18px;stroke-width:2"></i></span>
               <p class="tip-text"><strong>One skill per folder.</strong> Don't cram multiple purposes into a single SKILL.md.</p>
             </div>
-            <div class="tip-item">
-              <span class="tip-icon"><i data-lucide="scissors" style="width:18px;height:18px;stroke-width:2"></i></span>
-              <p class="tip-text"><strong>Keep descriptions specific and non-overlapping.</strong> It's the best way to keep things efficient.</p>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -1395,7 +1392,7 @@ PR feedback, or wants to improve code quality.</div>
       <!-- ── 3E: One Skill, Ten Skills, A Hundred Skills ────────── -->
       <div class="subsection-gap" id="s2b">
         <h2 class="section-headline">One Skill, Ten Skills,<br>A Hundred Skills</h2>
-        <p class="section-subtitle">Skills are modular. Add as many as you need without trade-offs.</p>
+        <p class="section-subtitle">Skills are modular. Add as many as you need without much trade-off.</p>
 
         <div class="skill-grid" id="skill-grid">
           <!-- Chips injected by JS -->
@@ -2064,7 +2061,7 @@ Max line length: 100 chars.`;
           badge: '<span class="tree-badge-t badge-user-t">Your custom skills go here!</span>',
           comment: '<span class="tree-comment"> ← Your workspace</span>',
           children: [
-            ['│   ├── ', '📁 code-review/',  '│   │   └── '],
+            ['│   ├── ', '📁 code-review-assistant/',  '│   │   └── '],
             ['│   └── ', '📁 my-api-style/', '│       └── '],
           ],
         },
@@ -2186,6 +2183,118 @@ Max line length: 100 chars.`;
 
   })();
   </script>
+
+  <!-- Skills Illustration -->
+  <section style="padding: 16px 24px 16px; display:flex; flex-direction:column; align-items:center;">
+    <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" style="max-width:580px; width:100%; display:block; margin:0 auto;">
+      <defs>
+        <marker id="arr2" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 Z" fill="#555"/>
+        </marker>
+      </defs>
+
+      <!-- Central toolbox at true center (350,148) -->
+      <g transform="translate(350,148)">
+        <rect x="-40" y="2" width="80" height="58" rx="9" fill="none" stroke="#252627" stroke-width="2.4"/>
+        <rect x="-44" y="-5" width="88" height="17" rx="6" fill="none" stroke="#252627" stroke-width="2.4"/>
+        <path d="M-15,-5 L-15,-16 Q-15,-24 -7,-24 L7,-24 Q15,-24 15,-16 L15,-5" fill="none" stroke="#252627" stroke-width="2.4" stroke-linecap="round"/>
+        <rect x="-8" y="16" width="16" height="11" rx="3" fill="none" stroke="#252627" stroke-width="2"/>
+      </g>
+
+      <!-- Tool icons radiating outward -->
+      <!-- Code </> left-upper -->
+      <text x="236" y="62" font-size="16" fill="#4B88A2" font-family="monospace" font-weight="700">&lt;/&gt;</text>
+      <!-- Globe top-center -->
+      <g transform="translate(350,36)">
+        <circle cx="0" cy="0" r="13" fill="none" stroke="#252627" stroke-width="1.8"/>
+        <ellipse cx="0" cy="0" rx="6" ry="13" fill="none" stroke="#252627" stroke-width="1.4"/>
+        <line x1="-13" y1="0" x2="13" y2="0" stroke="#252627" stroke-width="1.4"/>
+      </g>
+      <!-- Lightbulb right-upper -->
+      <g transform="translate(462,58)">
+        <circle cx="0" cy="-4" r="10" fill="none" stroke="#252627" stroke-width="1.8"/>
+        <path d="M-4,6 L4,6 M-3,10 L3,10" stroke="#252627" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+      <!-- Pencil left -->
+      <g transform="translate(240,140)">
+        <line x1="-13" y1="13" x2="13" y2="-13" stroke="#252627" stroke-width="2.1" stroke-linecap="round"/>
+        <path d="M13,-13 L20,-6 L6,7 Z" fill="none" stroke="#252627" stroke-width="1.8"/>
+        <line x1="-13" y1="13" x2="-17" y2="17" stroke="#252627" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <!-- Magnifier right -->
+      <g transform="translate(462,140)">
+        <circle cx="0" cy="0" r="10" fill="none" stroke="#252627" stroke-width="2"/>
+        <line x1="8" y1="8" x2="16" y2="16" stroke="#252627" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- Dashed spokes toolbox → icons -->
+      <line x1="332" y1="141" x2="258" y2="68"  stroke="#555" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.3"/>
+      <line x1="350" y1="136" x2="350" y2="50"  stroke="#555" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.3"/>
+      <line x1="368" y1="141" x2="458" y2="66"  stroke="#555" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.3"/>
+      <line x1="312" y1="162" x2="254" y2="148" stroke="#555" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.3"/>
+      <line x1="388" y1="162" x2="458" y2="148" stroke="#555" stroke-width="1.1" stroke-dasharray="4 3" opacity="0.3"/>
+
+      <!-- Arrows from users → toolbox -->
+      <line x1="90"  y1="248" x2="312" y2="182" stroke="#555" stroke-width="1.6" marker-end="url(#arr2)"/>
+      <line x1="194" y1="268" x2="322" y2="202" stroke="#555" stroke-width="1.6" marker-end="url(#arr2)"/>
+      <line x1="350" y1="282" x2="350" y2="216" stroke="#555" stroke-width="1.6" marker-end="url(#arr2)"/>
+      <line x1="506" y1="268" x2="378" y2="202" stroke="#555" stroke-width="1.6" marker-end="url(#arr2)"/>
+      <line x1="610" y1="248" x2="388" y2="182" stroke="#555" stroke-width="1.6" marker-end="url(#arr2)"/>
+
+      <!-- Person icon macro (head + body) reusable via inline groups -->
+      <!-- User 1 @ 90,262 -->
+      <g transform="translate(90,262)">
+        <circle cx="0" cy="-14" r="11" fill="#4B88A2"/>
+        <path d="M-18,8 Q-18,-4 0,-4 Q18,-4 18,8 Z" fill="#4B88A2"/>
+        <circle cx="0" cy="-14" r="11" fill="none" stroke="white" stroke-width="1.2"/>
+        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#252627" font-weight="600">User 1</text>
+      </g>
+      <!-- User 2 @ 194,282 -->
+      <g transform="translate(194,282)">
+        <circle cx="0" cy="-14" r="11" fill="#4B88A2"/>
+        <path d="M-18,8 Q-18,-4 0,-4 Q18,-4 18,8 Z" fill="#4B88A2"/>
+        <circle cx="0" cy="-14" r="11" fill="none" stroke="white" stroke-width="1.2"/>
+        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#252627" font-weight="600">User 2</text>
+      </g>
+      <!-- User 3 @ 350,296 -->
+      <g transform="translate(350,296)">
+        <circle cx="0" cy="-14" r="11" fill="#4B88A2"/>
+        <path d="M-18,8 Q-18,-4 0,-4 Q18,-4 18,8 Z" fill="#4B88A2"/>
+        <circle cx="0" cy="-14" r="11" fill="none" stroke="white" stroke-width="1.2"/>
+        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#252627" font-weight="600">User 3</text>
+      </g>
+      <!-- User 4 @ 506,282 -->
+      <g transform="translate(506,282)">
+        <circle cx="0" cy="-14" r="11" fill="#4B88A2"/>
+        <path d="M-18,8 Q-18,-4 0,-4 Q18,-4 18,8 Z" fill="#4B88A2"/>
+        <circle cx="0" cy="-14" r="11" fill="none" stroke="white" stroke-width="1.2"/>
+        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#252627" font-weight="600">User 4</text>
+      </g>
+      <!-- User 5 @ 610,262 -->
+      <g transform="translate(610,262)">
+        <circle cx="0" cy="-14" r="11" fill="#4B88A2"/>
+        <path d="M-18,8 Q-18,-4 0,-4 Q18,-4 18,8 Z" fill="#4B88A2"/>
+        <circle cx="0" cy="-14" r="11" fill="none" stroke="white" stroke-width="1.2"/>
+        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#252627" font-weight="600">User 5</text>
+      </g>
+    </svg>
+
+    <p style="margin-top:20px; font-size:0.9rem; color:#555; max-width:440px; text-align:center; line-height:1.7;">
+      One skill, many users — build once and share across your entire team.
+    </p>
+  </section>
+
+  <!-- Complete Guide Link -->
+  <section style="text-align:center; padding: 48px 24px 64px; border-top: 1px solid rgba(75,136,162,0.2);">
+    <p style="font-size:0.85rem; opacity:0.5; margin-bottom:14px; letter-spacing:0.06em; text-transform:uppercase;">Further Reading</p>
+    <a href="https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf"
+       target="_blank" rel="noopener"
+       style="display:inline-flex; align-items:center; gap:10px; background:#4B88A2; color:#fff; font-size:0.92rem; font-weight:600; padding:14px 28px; border-radius:10px; text-decoration:none; transition:opacity 0.2s;"
+       onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      The Complete Guide to Building Skills for Claude (PDF)
+    </a>
+  </section>
 
 </body>
 </html>
