@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>FY25 Australian Banks — Comparative Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root {
+    --ink:        #0e0e10;
+    --ink-2:      #1a1a1f;
+    --paper:      #f3efe6;
+    --paper-2:    #e9e3d4;
+    --rule:       #2a2a30;
+    --muted:      #6b6357;
+    --accent:     #c0392b;     /* deep vermillion */
+    --gold:       #b9842c;
+    --green:      #3f6b3a;
+    --soft:       #d8cfb8;
+
+    /* bank palette — distinctive, intentional */
+    --cba:        #ffcc00;     /* CBA yellow */
+    --cba-ink:    #1a1a1f;
+    --wbc:        #c0392b;     /* Westpac red */
+    --nab:        #d83a3a;     /* NAB red */
+    --anz:        #00468b;     /* ANZ navy */
+    --mqg:        #595959;     /* Macquarie graphite */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  /* paper grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(0,0,0,0.018) 0%, transparent 40%),
+      radial-gradient(circle at 75% 70%, rgba(0,0,0,0.018) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ============ MASTHEAD ============ */
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 28px 0 18px;
+    margin-bottom: 0;
+  }
+  .mast-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .mast-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .mast-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .mast-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(38px, 7vw, 76px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin: 18px 0 6px;
+    font-variation-settings: "opsz" 144;
+  }
+  .mast-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+  }
+  .mast-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(16px, 2.2vw, 21px);
+    color: var(--muted);
+    max-width: 720px;
+    margin-top: 6px;
+  }
+
+  /* ============ HERO STAT GRID ============ */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin: 36px 0 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+  .hero-cell {
+    padding: 22px 16px 22px 0;
+    border-right: 1px solid rgba(14,14,16,0.18);
+    position: relative;
+  }
+  .hero-cell:last-child { border-right: none; }
+  .hero-cell .bank-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bank-tag .swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .hero-cell .bank-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    line-height: 1.05;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .hero-cell .npat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .hero-cell .npat strong {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    color: var(--ink);
+    display: block;
+    font-weight: 500;
+    margin-top: 2px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ============ SECTIONS ============ */
+  section.metric {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid rgba(14,14,16,0.15);
+    position: relative;
+  }
+  .sec-header {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 24px;
+    margin-bottom: 36px;
+    align-items: start;
+  }
+  .sec-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-top: 1px solid var(--ink);
+    padding-top: 6px;
+  }
+  .sec-num em {
+    display: block;
+    font-style: normal;
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    color: var(--accent);
+    line-height: 1;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+  .sec-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(28px, 4.5vw, 48px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0 0 8px;
+  }
+  .sec-title em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .sec-defn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sec-lead {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(17px, 2.2vw, 22px);
+    line-height: 1.4;
+    color: var(--ink-2);
+    max-width: 720px;
+    margin: 14px 0 0;
+  }
+
+  /* commentary block */
+  .commentary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px dashed rgba(14,14,16,0.25);
+  }
+  .commentary p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+  }
+  .commentary p:first-child::first-letter {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    float: left;
+    line-height: 0.9;
+    margin: 4px 8px 0 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .pull-quote {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--ink);
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    margin: 8px 0 16px;
+  }
+  .pull-quote .attr {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* ============ CHART CONTAINER ============ */
+  .chart-wrap {
+    background: var(--paper-2);
+    border: 1px solid rgba(14,14,16,0.18);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(14,14,16,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,14,16,0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+  .chart-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    position: relative;
+    z-index: 2;
+  }
+  .chart-meta strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  svg.chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* axis & label styling */
+  .axis path, .axis line { stroke: rgba(14,14,16,0.3); stroke-width: 0.5; }
+  .axis text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .gridline { stroke: rgba(14,14,16,0.08); stroke-dasharray: 2,3; }
+  .bar-label {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 500;
+    fill: var(--ink);
+  }
+  .bar-bank {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .benchmark-line { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 4,3; }
+  .benchmark-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ============ FOOTNOTE ============ */
+  footer {
+    padding: 60px 0 80px;
+    border-top: 2px solid var(--ink);
+    margin-top: 0;
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .foot-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 14px;
+  }
+  .foot-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .foot-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ============ ANIMATIONS ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* tooltips */
+  .tooltip {
+    position: absolute;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    z-index: 100;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip strong {
+    color: var(--paper);
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+    letter-spacing: 0;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 880px) {
+    .container { padding: 0 20px; }
+    .hero-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-cell {
+      border-right: 1px solid rgba(14,14,16,0.18);
+      border-bottom: 1px solid rgba(14,14,16,0.18);
+      padding: 18px 14px 18px 0;
+    }
+    .hero-cell:nth-child(2n) { border-right: none; }
+    .hero-cell:last-child { grid-column: 1 / -1; border-bottom: none; }
+    .sec-header { grid-template-columns: 60px 1fr; gap: 16px; }
+    .sec-num em { font-size: 28px; }
+    .commentary { grid-template-columns: 1fr; gap: 20px; }
+    .foot-grid { grid-template-columns: 1fr; gap: 24px; }
+    section.metric { padding: 56px 0 42px; }
+    .chart-wrap { padding: 16px 12px; }
+  }
+  @media (max-width: 480px) {
+    .container { padding: 0 16px; }
+    .hero-cell .bank-name { font-size: 18px; }
+    .hero-cell .npat strong { font-size: 22px; }
+    .pull-quote { font-size: 18px; padding-left: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="tooltip" id="tooltip"></div>
+
+<div class="container">
+
+  <!-- ========== MASTHEAD ========== -->
+  <header class="masthead">
+    <div class="mast-row">
+      <span class="mast-eyebrow">FY25 · Comparative Banking Review</span>
+      <span class="mast-date">Vol. I · Sydney · 2026</span>
+    </div>
+    <h1 class="mast-title">The Big Four,<br/>and <em>the Other One.</em></h1>
+    <p class="mast-sub">A comparison of CBA, Westpac, NAB, ANZ and Macquarie across the metrics that decide who wins shareholder capital — return, margin, efficiency, and resilience — for the year just ended.</p>
+
+    <div class="hero-grid" id="heroGrid"></div>
+  </header>
+
+  <!-- ========== SECTION 1: ROE ========== -->
+  <section class="metric reveal" id="sec-roe">
+    <div class="sec-header">
+      <div class="sec-num">§ I<em>ROE</em></div>
+      <div>
+        <div class="sec-defn">Return on Equity · Cash basis · FY25</div>
+        <h2 class="sec-title">The capital question: <em>does it earn its keep?</em></h2>
+        <p class="sec-lead">Return on equity is the single number that tells you whether a bank is creating value above its cost of capital. Anything below ~10% in this rate environment is an underperformance.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-meta">
+        <span><strong>Fig. 1</strong> — Cash ROE (%)</span>
+        <span>Cost of equity ≈ 10–11%</span>
+      </div>
+      <svg id="chart-roe" class="chart" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="commentary">
+      <div>
+        <p>CBA continues to occupy a category of one. At 13.5% cash ROE it sits roughly four percentage points clear of ANZ and Westpac, and is still pulling away on the back of disciplined retail franchise economics, dominant proprietary mortgage flow, and the highest interest-earning capital base of the five.</p>
+        <p>NAB's 11.4% is steady but unspectacular — the result of investing through the cycle rather than harvesting. The new CEO's stated ambition is "leading peer" returns, which on these numbers means closing roughly 200 bps of distance with CBA.</p>
+      </div>
+      <div>
+        <div class="pull-quote">
+          The gap between CBA and the rest is no longer a cycle quirk — it has hardened into structure.
+          <span class="attr">— Editorial commentary</span>
+        </div>
+        <p>ANZ at 8.1% is the standout disappointment, dragged down by ~$1.1bn of significant items including the ASIC settlement and restructuring. On an underlying basis (9.6%) it is closer to Westpac, but still earning below its cost of capital.</p>
+        <p>Macquarie at 11.2% is doing this with a fundamentally different business mix — asset management, markets, and a smaller but faster-growing bank — and remains the only one of the five that is materially diversified outside Australia.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 2: NIM ========== -->
+  <section class="metric reveal" id="sec-nim">
+    <div class="sec-header">
+      <div class="sec-num">§ II<em>NIM</em></div>
+      <div>
+        <div class="sec-defn">Net Interest Margin · Group basis · FY25</div>
+        <h2 class="sec-title">The price of <em>borrowed money,</em> sold on.</h2>
+        <p class="sec-lead">NIM is the spread between what a bank pays for funding and what it earns on lending. After two years of compression from mortgage and deposit competition, FY25 marks the first sign of stabilisation.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-meta">
+        <span><strong>Fig. 2</strong> — Group NIM (%) · trajectory and YoY change</span>
+        <span>Note: Macquarie excluded — non-comparable business mix</span>
+      </div>
+      <svg id="chart-nim" class="chart" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="commentary">
+      <div>
+        <p>The headline story is dispersion. CBA's 2.08% NIM is now 13 basis points wider than NAB's, 14 wider than Westpac's, and a remarkable 53 wider than ANZ's — a chasm for what is supposedly a commoditised retail product.</p>
+        <p>Two structural factors are doing the work: CBA earns more on its capital and replicating portfolio than peers (a function of size and funding profile), and its proprietary mortgage flow at 66% means less margin leaks to broker commissions.</p>
+      </div>
+      <div>
+        <p>ANZ's 1.55% reflects its institutional-heavy mix — those loans are lower-risk and lower-margin, but they are also the segment most exposed to global pricing. The arrival of a new CEO and the "ANZ 2030" strategy is partly a bet that this mix can be re-weighted.</p>
+        <div class="pull-quote">
+          The mortgage war is over. The deposit war never really started — banks just kept paying.
+          <span class="attr">— Margin commentary</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 3: COST/INCOME ========== -->
+  <section class="metric reveal" id="sec-cti">
+    <div class="sec-header">
+      <div class="sec-num">§ III<em>C/I</em></div>
+      <div>
+        <div class="sec-defn">Cost-to-Income Ratio · FY25</div>
+        <h2 class="sec-title">Discipline, or <em>investment</em>?</h2>
+        <p class="sec-lead">A higher ratio means more cents of every revenue dollar consumed by running the bank. It is also where strategic bets — technology, restructuring, frontline hiring — show up first as a headwind.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-meta">
+        <span><strong>Fig. 3</strong> — Cost-to-Income Ratio (%) · lower is better</span>
+        <span>Big 4 average · ~48%</span>
+      </div>
+      <svg id="chart-cti" class="chart" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="commentary">
+      <div>
+        <p>CBA at ~42% is, by any global standard, an exceptionally efficient retail bank — the product of two decades of branch consolidation, a unified core platform, and scale. It is the moat.</p>
+        <p>Westpac's 53% (and ANZ's matching figure) tell a different story: ongoing transformation programs (UNITE at Westpac, ANZ 2030) plus restructuring charges. Westpac's expenses grew 9% in FY25, of which $273m was restructuring under "Fit for Growth". Real efficiency gains are still ahead.</p>
+      </div>
+      <div>
+        <p>NAB at ~46% sits between the leader and the laggards — a respectable position, though FY25 saw investment spend step up from $1.6bn to $1.8bn, much of it directed at frontline bankers and AI. The market reads this as productive investment.</p>
+        <p>Macquarie's ~71% looks alarming until you remember its income mix is dominated by asset management performance fees and markets — businesses that carry far higher variable comp ratios than retail banking. Compared peer-to-peer (BFS division), Macquarie is competitive.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4: CET1 ========== -->
+  <section class="metric reveal" id="sec-cet1">
+    <div class="sec-header">
+      <div class="sec-num">§ IV<em>CET1</em></div>
+      <div>
+        <div class="sec-defn">Common Equity Tier 1 Capital Ratio · FY25</div>
+        <h2 class="sec-title">The capital that <em>has nowhere to go.</em></h2>
+        <p class="sec-lead">CET1 is the highest-quality regulatory capital. APRA's "unquestionably strong" benchmark sits at 10.25% (after countercyclical buffer). All five are comfortably above. Excess capital is the new normal.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-meta">
+        <span><strong>Fig. 4</strong> — CET1 Ratio (%) vs APRA minimum</span>
+        <span>APRA "unquestionably strong" · 10.25%</span>
+      </div>
+      <svg id="chart-cet1" class="chart" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="commentary">
+      <div>
+        <p>Every Australian bank is now running with capital well above what regulators demand and arguably what investors need. Macquarie's 12.8% is the highest of the five, in part because of how its non-bank businesses are structured (the harmonised global ratio is 17.6%).</p>
+        <p>CBA at 12.3% has been actively returning capital — buybacks plus dividend — but earnings keep refilling the buffer. The bank's stated operating target is >11.0% post-dividend, which leaves several billion dollars of explicit excess.</p>
+      </div>
+      <div>
+        <div class="pull-quote">
+          Australian banks have a high-class problem: too much capital, and a regulator unenthusiastic about giving it back.
+          <span class="attr">— Capital commentary</span>
+        </div>
+        <p>NAB at 11.7% sits lowest, but APRA's planned 2027 phase-out of AT1 capital (replaced by 0.25% CET1 + 1.25% Tier 2) means optical pressure on this number is structural rather than a sign of weakness. The pro-forma post-MLC sale is 11.81%.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 5: COMPOSITE ========== -->
+  <section class="metric reveal" id="sec-radar">
+    <div class="sec-header">
+      <div class="sec-num">§ V<em>ALL</em></div>
+      <div>
+        <div class="sec-defn">Composite View · All metrics, FY25</div>
+        <h2 class="sec-title">A single picture, <em>five different shapes.</em></h2>
+        <p class="sec-lead">Plotted on a common axis, the silhouettes of these banks reveal more than any individual league table. Tap a name to isolate.</p>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-meta">
+        <span><strong>Fig. 5</strong> — Normalised performance shape · all metrics inverted so that "outward" = better</span>
+        <span>Click a bank to highlight</span>
+      </div>
+      <svg id="chart-radar" class="chart" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="radarLegend" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;position:relative;z-index:2;"></div>
+    </div>
+
+    <div class="commentary">
+      <div>
+        <p>Read the shapes, not the scores. CBA's silhouette stretches outward on every axis except CET1 — an unusually balanced profile. The clear conclusion: it is not winning on one metric, it is winning on all of them.</p>
+        <p>Macquarie's shape is asymmetric — strong on capital and ROE, weak on cost-to-income, and absent on NIM (a function of business model, not performance). It is a different animal entirely.</p>
+      </div>
+      <div>
+        <p>The tightest cluster is Westpac and ANZ: similar margins, similar efficiency, similar returns. Both are mid-cycle in their transformations, both are betting that FY26 and FY27 are when efficiency gains start landing.</p>
+        <p>NAB is in transition — the shape is unfinished. New CEO, refreshed strategy, stepped-up investment. The next two annual reports will determine which way it bends.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <div class="foot-grid">
+      <div>
+        <h3 class="foot-title">A note on comparability</h3>
+        <p class="foot-text">Reporting periods differ: CBA reports to 30 June, Macquarie to 31 March, and ANZ, NAB and Westpac to 30 September. All figures are FY25 results as published in each bank's full-year announcement.</p>
+        <p class="foot-text">ROE for the Big Four is on a cash earnings basis. Macquarie reports statutory net profit. ANZ figures shown are on a cash basis including significant items; underlying figures (excluding ~$1.1bn of significant items) are noted in commentary where material.</p>
+        <p class="foot-text">Macquarie NIM is excluded from the comparison: it operates a fundamentally different business mix dominated by asset management, markets and capital activities. Cost-to-income is shown for completeness but is similarly affected.</p>
+      </div>
+      <div>
+        <h3 class="foot-title">Sources</h3>
+        <p class="foot-meta" style="line-height:1.9;">CBA · FY25 Results, Aug 2025<br/>Westpac · FY25 Results, Nov 2025<br/>NAB · FY25 Results, Nov 2025<br/>ANZ · FY25 Results, Nov 2025<br/>Macquarie · FY25 Results, May 2025</p>
+        <p class="foot-meta" style="margin-top:18px;color:var(--accent);">END · § FY25 · 2026</p>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================
+   FY25 BANK DATA
+   All figures from each bank's full-year 2025 results announcement.
+   ========================================================= */
+const banks = [
+  { code:'CBA',  name:'Commonwealth Bank', color:'var(--cba)',  hex:'#ffcc00', npat:10.25, period:'30 Jun 2025', roe:13.5, nim:2.08, cti:42.0, cet1:12.3 },
+  { code:'WBC',  name:'Westpac',           color:'var(--wbc)',  hex:'#c0392b', npat:7.00,  period:'30 Sep 2025', roe:9.7,  nim:1.94, cti:53.0, cet1:12.5 },
+  { code:'NAB',  name:'NAB',               color:'var(--nab)',  hex:'#d83a3a', npat:7.09,  period:'30 Sep 2025', roe:11.4, nim:1.74, cti:46.0, cet1:11.7 },
+  { code:'ANZ',  name:'ANZ',               color:'var(--anz)',  hex:'#00468b', npat:6.90,  period:'30 Sep 2025', roe:9.6,  nim:1.55, cti:53.0, cet1:12.0 },
+  { code:'MQG',  name:'Macquarie',         color:'var(--mqg)',  hex:'#595959', npat:3.72,  period:'31 Mar 2025', roe:11.2, nim:null, cti:71.0, cet1:12.8 }
+];
+
+/* ---------- HERO STAT GRID ---------- */
+const heroGrid = document.getElementById('heroGrid');
+banks.forEach(b => {
+  const cell = document.createElement('div');
+  cell.className = 'hero-cell';
+  cell.innerHTML = `
+    <div class="bank-tag"><span class="swatch" style="background:${b.hex}"></span>${b.code}</div>
+    <div class="bank-name">${b.name}</div>
+    <div class="npat">FY25 Cash NPAT<strong>$${b.npat.toFixed(2)}bn</strong></div>
+  `;
+  heroGrid.appendChild(cell);
+});
+
+/* ---------- TOOLTIP ---------- */
+const tooltip = d3.select('#tooltip');
+function showTip(html, event) {
+  tooltip.html(html).classed('visible', true);
+  moveTip(event);
+}
+function moveTip(event) {
+  const tt = tooltip.node();
+  const w = tt.offsetWidth, h = tt.offsetHeight;
+  let x = event.pageX + 14;
+  let y = event.pageY - h - 10;
+  if (x + w > window.scrollX + window.innerWidth - 10) x = event.pageX - w - 14;
+  if (y < window.scrollY + 10) y = event.pageY + 18;
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
+}
+function hideTip() { tooltip.classed('visible', false); }
+
+/* ---------- HORIZONTAL BAR CHART (reusable for ROE, NIM, CET1) ---------- */
+function drawBarChart(svgId, valueKey, opts = {}) {
+  const svg = d3.select(svgId);
+  svg.selectAll('*').remove();
+
+  const data = banks.filter(b => b[valueKey] != null).slice().sort((a,b) =>
+    opts.descending === false ? a[valueKey] - b[valueKey] : b[valueKey] - a[valueKey]
+  );
+
+  const W = 800, H = 460;
+  const margin = { top: 20, right: 100, bottom: 50, left: 110 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xMax = opts.xMax || d3.max(data, d => d[valueKey]) * 1.18;
+  const xMin = opts.xMin || 0;
+  const x = d3.scaleLinear().domain([xMin, xMax]).range([0, innerW]);
+  const y = d3.scaleBand().domain(data.map(d => d.code)).range([0, innerH]).padding(0.32);
+
+  // gridlines
+  const gridTicks = x.ticks(6);
+  g.append('g').selectAll('line').data(gridTicks).join('line')
+    .attr('class','gridline')
+    .attr('x1', d => x(d)).attr('x2', d => x(d))
+    .attr('y1', 0).attr('y2', innerH);
+
+  // x axis
+  g.append('g').attr('class','axis')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(6).tickSize(0).tickPadding(10).tickFormat(d => d + (opts.suffix || '')));
+  g.append('text')
+    .attr('x', innerW/2).attr('y', innerH + 42)
+    .attr('text-anchor','middle')
+    .attr('class','bar-bank')
+    .text(opts.xLabel || '');
+
+  // benchmark line
+  if (opts.benchmark != null) {
+    const bx = x(opts.benchmark);
+    g.append('line')
+      .attr('class','benchmark-line')
+      .attr('x1', bx).attr('x2', bx)
+      .attr('y1', -6).attr('y2', innerH + 6);
+    g.append('text')
+      .attr('class','benchmark-text')
+      .attr('x', bx + 6).attr('y', -8)
+      .text(opts.benchmarkLabel || '');
+  }
+
+  // bars
+  const bars = g.selectAll('g.row').data(data, d => d.code).join('g')
+    .attr('class','row')
+    .attr('transform', d => `translate(0,${y(d.code)})`);
+
+  // bank label (left)
+  bars.append('text')
+    .attr('class','bar-bank')
+    .attr('x', -16).attr('y', y.bandwidth()/2 + 4)
+    .attr('text-anchor','end')
+    .text(d => d.code);
+
+  // base track (subtle)
+  bars.append('rect')
+    .attr('x', 0).attr('y', y.bandwidth()*0.15)
+    .attr('width', innerW).attr('height', y.bandwidth()*0.7)
+    .attr('fill','rgba(14,14,16,0.04)');
+
+  // value bar
+  const rects = bars.append('rect')
+    .attr('class','value-bar')
+    .attr('x', 0).attr('y', y.bandwidth()*0.15)
+    .attr('width', 0)
+    .attr('height', y.bandwidth()*0.7)
+    .attr('fill', d => d.hex)
+    .style('cursor','pointer')
+    .on('mouseenter', (event, d) => {
+      d3.select(event.currentTarget).attr('opacity', 0.82);
+      showTip(`<strong>${d.name}</strong>${opts.tipLabel || valueKey.toUpperCase()}: ${d[valueKey]}${opts.suffix || ''}<br/>FY25 · ${d.period}`, event);
+    })
+    .on('mousemove', moveTip)
+    .on('mouseleave', (event) => {
+      d3.select(event.currentTarget).attr('opacity', 1);
+      hideTip();
+    });
+
+  // value label (right of bar)
+  const labels = bars.append('text')
+    .attr('class','bar-label')
+    .attr('x', 4).attr('y', y.bandwidth()/2 + 5)
+    .attr('opacity', 0)
+    .text(d => d[valueKey].toFixed(opts.decimals != null ? opts.decimals : 2) + (opts.suffix || ''));
+
+  // animate when in view
+  return () => {
+    rects.transition().duration(1100).delay((d,i) => i * 90).ease(d3.easeCubicOut)
+      .attr('width', d => x(d[valueKey]));
+    labels.transition().duration(900).delay((d,i) => i * 90 + 600)
+      .attr('x', d => x(d[valueKey]) + 10)
+      .attr('opacity', 1);
+  };
+}
+
+/* ---------- LOLLIPOP-STYLE NIM (with YoY change indicator) ---------- */
+function drawNimChart() {
+  const svg = d3.select('#chart-nim');
+  svg.selectAll('*').remove();
+
+  const data = banks.filter(b => b.nim != null).slice().sort((a,b) => b.nim - a.nim);
+  // YoY changes (FY24 -> FY25)
+  const yoy = { CBA: +9, WBC: -1, NAB: +3, ANZ: -2 };
+
+  const W = 800, H = 460;
+  const margin = { top: 30, right: 100, bottom: 60, left: 110 };
+  const innerW = W - margin.left - margin.right;
+  const innerH = H - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, 2.4]).range([0, innerW]);
+  const y = d3.scaleBand().domain(data.map(d => d.code)).range([0, innerH]).padding(0.4);
+
+  // gridlines
+  g.append('g').selectAll('line').data(x.ticks(6)).join('line')
+    .attr('class','gridline')
+    .attr('x1', d => x(d)).attr('x2', d => x(d))
+    .attr('y1', 0).attr('y2', innerH);
+
+  g.append('g').attr('class','axis')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(6).tickSize(0).tickPadding(10).tickFormat(d => d + '%'));
+  g.append('text')
+    .attr('x', innerW/2).attr('y', innerH + 42)
+    .attr('text-anchor','middle').attr('class','bar-bank')
+    .text('Net interest margin (%)');
+
+  const rows = g.selectAll('g.row').data(data, d => d.code).join('g')
+    .attr('class','row')
+    .attr('transform', d => `translate(0,${y(d.code)})`);
+
+  rows.append('text')
+    .attr('class','bar-bank')
+    .attr('x', -16).attr('y', y.bandwidth()/2 + 4)
+    .attr('text-anchor','end')
+    .text(d => d.code);
+
+  // line from 0 to value
+  const lines = rows.append('line')
+    .attr('x1', 0).attr('x2', 0)
+    .attr('y1', y.bandwidth()/2).attr('y2', y.bandwidth()/2)
+    .attr('stroke', d => d.hex).attr('stroke-width', 2);
+
+  // dot
+  const dots = rows.append('circle')
+    .attr('cx', 0).attr('cy', y.bandwidth()/2)
+    .attr('r', 0)
+    .attr('fill', d => d.hex)
+    .style('cursor','pointer')
+    .on('mouseenter', (event, d) => {
+      const yo = yoy[d.code];
+      const yoStr = yo > 0 ? `+${yo} bps` : `${yo} bps`;
+      showTip(`<strong>${d.name}</strong>NIM: ${d.nim}%<br/>YoY: ${yoStr}<br/>FY25 · ${d.period}`, event);
+    })
+    .on('mousemove', moveTip)
+    .on('mouseleave', hideTip);
+
+  // value label
+  const valueLabels = rows.append('text')
+    .attr('class','bar-label')
+    .attr('y', y.bandwidth()/2 + 5)
+    .attr('opacity', 0)
+    .text(d => d.nim.toFixed(2) + '%');
+
+  // YoY pill
+  const yoyGroups = rows.append('g').attr('opacity', 0).attr('class','yoy-pill');
+  yoyGroups.each(function(d) {
+    const yo = yoy[d.code];
+    if (yo == null) return;
+    const sel = d3.select(this);
+    const isUp = yo > 0;
+    sel.append('text')
+      .attr('y', y.bandwidth()/2 + 5)
+      .attr('class','bar-bank')
+      .attr('fill', isUp ? 'var(--green)' : 'var(--accent)')
+      .style('font-size','11px')
+      .text((isUp ? '▲ +' : '▼ ') + Math.abs(yo) + ' bps YoY');
+  });
+
+  return () => {
+    lines.transition().duration(900).delay((d,i) => i * 100).ease(d3.easeCubicOut)
+      .attr('x2', d => x(d.nim));
+    dots.transition().duration(700).delay((d,i) => i * 100 + 700)
+      .attr('cx', d => x(d.nim))
+      .attr('r', 7);
+    valueLabels.transition().duration(600).delay((d,i) => i * 100 + 1000)
+      .attr('x', d => x(d.nim) + 14)
+      .attr('opacity', 1);
+    yoyGroups.transition().duration(600).delay((d,i) => i * 100 + 1200)
+      .attr('opacity', 1)
+      .each(function(d) {
+        d3.select(this).select('text').attr('x', x(d.nim) + 80);
+      });
+  };
+}
+
+/* ---------- RADAR / POLYGON CHART ---------- */
+function drawRadar() {
+  const svg = d3.select('#chart-radar');
+  svg.selectAll('*').remove();
+
+  const W = 800, H = 600;
+  const cx = W/2, cy = H/2 + 10;
+  const R = 220;
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+  // 4 axes — invert C/I so "outward" always means better
+  const axes = [
+    { key:'roe',  label:'ROE',         max:14,    suffix:'%' },
+    { key:'nim',  label:'NIM',         max:2.2,   suffix:'%' },
+    { key:'ctiInv', label:'EFFICIENCY', max:60, suffix:'',  // 100 - cti, higher = better
+       compute: d => d.cti == null ? null : (100 - d.cti) },
+    { key:'cet1', label:'CAPITAL',     max:14,    suffix:'%' }
+  ];
+  const N = axes.length;
+  const angleFor = i => -Math.PI/2 + i * (2*Math.PI / N);
+
+  // grid rings
+  const rings = [0.25, 0.5, 0.75, 1.0];
+  rings.forEach(r => {
+    const pts = d3.range(N).map(i => {
+      const a = angleFor(i);
+      return [Math.cos(a)*R*r, Math.sin(a)*R*r];
+    });
+    g.append('polygon')
+      .attr('points', pts.map(p => p.join(',')).join(' '))
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(14,14,16,0.12)')
+      .attr('stroke-width', 0.5)
+      .attr('stroke-dasharray', '2,3');
+  });
+
+  // axis lines + labels
+  axes.forEach((ax, i) => {
+    const a = angleFor(i);
+    g.append('line')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', Math.cos(a)*R).attr('y2', Math.sin(a)*R)
+      .attr('stroke', 'rgba(14,14,16,0.18)')
+      .attr('stroke-width', 0.5);
+
+    const lx = Math.cos(a) * (R + 32);
+    const ly = Math.sin(a) * (R + 32);
+    g.append('text')
+      .attr('x', lx).attr('y', ly)
+      .attr('text-anchor', Math.abs(Math.cos(a)) < 0.1 ? 'middle' : (Math.cos(a) > 0 ? 'start' : 'end'))
+      .attr('dominant-baseline', 'middle')
+      .attr('class','bar-bank')
+      .style('font-size','11px')
+      .text(ax.label);
+
+    // tick labels on top axis only
+    if (i === 0) {
+      [0.5, 1.0].forEach(r => {
+        g.append('text')
+          .attr('x', 4).attr('y', -R*r)
+          .attr('class','bar-bank')
+          .style('font-size','9px')
+          .style('fill','rgba(14,14,16,0.4)')
+          .text((ax.max*r).toFixed(1) + ax.suffix);
+      });
+    }
+  });
+
+  // each bank polygon
+  const polys = [];
+  banks.forEach((b, bi) => {
+    const values = axes.map((ax, i) => {
+      const v = ax.compute ? ax.compute(b) : b[ax.key];
+      if (v == null) return { x:0, y:0, valid:false, axis:ax };
+      const norm = Math.max(0, Math.min(1, v / ax.max));
+      const a = angleFor(i);
+      return { x: Math.cos(a) * R * norm, y: Math.sin(a) * R * norm, valid: true, axis: ax, value: v };
+    });
+
+    const validPts = values.filter(v => v.valid);
+    if (validPts.length < 3) return;
+
+    const poly = g.append('polygon')
+      .attr('points', validPts.map(p => `${p.x},${p.y}`).join(' '))
+      .attr('fill', b.hex)
+      .attr('fill-opacity', 0.10)
+      .attr('stroke', b.hex)
+      .attr('stroke-width', 1.6)
+      .attr('opacity', 0)
+      .style('cursor','pointer')
+      .style('transition', 'fill-opacity 0.3s, stroke-width 0.3s');
+
+    // dots at vertices
+    const dotGroup = g.append('g').attr('opacity', 0);
+    validPts.forEach(p => {
+      dotGroup.append('circle')
+        .attr('cx', p.x).attr('cy', p.y)
+        .attr('r', 3.5)
+        .attr('fill', b.hex)
+        .attr('stroke', 'var(--paper-2)')
+        .attr('stroke-width', 1.5);
+    });
+
+    polys.push({ poly, dotGroup, bank: b, validPts });
+  });
+
+  // legend / interactivity
+  const legend = d3.select('#radarLegend');
+  legend.selectAll('*').remove();
+  let activeFilter = null;
+
+  banks.forEach(b => {
+    const item = legend.append('div')
+      .style('display','flex').style('align-items','center').style('gap','6px')
+      .style('cursor','pointer').style('padding','4px 8px')
+      .style('border', '1px solid transparent')
+      .style('transition', 'border 0.2s, opacity 0.2s')
+      .on('mouseenter', function() {
+        d3.select(this).style('border', '1px solid var(--ink)');
+      })
+      .on('mouseleave', function() {
+        d3.select(this).style('border', '1px solid transparent');
+      })
+      .on('click', () => {
+        activeFilter = (activeFilter === b.code) ? null : b.code;
+        polys.forEach(p => {
+          if (activeFilter == null) {
+            p.poly.attr('fill-opacity', 0.10).attr('stroke-width', 1.6);
+            p.dotGroup.attr('opacity', 1);
+          } else if (p.bank.code === activeFilter) {
+            p.poly.attr('fill-opacity', 0.32).attr('stroke-width', 2.4);
+            p.dotGroup.attr('opacity', 1);
+          } else {
+            p.poly.attr('fill-opacity', 0.03).attr('stroke-width', 1);
+            p.dotGroup.attr('opacity', 0.2);
+          }
+        });
+        legend.selectAll('div').style('opacity', d => 1);
+        if (activeFilter) {
+          legend.selectAll('div').style('opacity', function() {
+            return d3.select(this).select('span').text() === activeFilter ? 1 : 0.4;
+          });
+        }
+      });
+
+    item.append('span')
+      .style('width','10px').style('height','10px').style('border-radius','2px')
+      .style('background', b.hex).style('display','inline-block');
+    item.append('span').text(b.code);
+  });
+
+  return () => {
+    polys.forEach((p, i) => {
+      p.poly.transition().duration(900).delay(i * 150).ease(d3.easeCubicOut)
+        .attr('opacity', 1);
+      p.dotGroup.transition().duration(700).delay(i * 150 + 600)
+        .attr('opacity', 1);
+    });
+  };
+}
+
+/* ---------- BUILD ALL CHARTS (deferred to scroll-trigger) ---------- */
+const chartBuilders = {
+  'sec-roe':   () => drawBarChart('#chart-roe',  'roe',  { suffix:'%', decimals:1, benchmark:10, benchmarkLabel:'~ Cost of equity', xLabel:'Cash Return on Equity (%)', tipLabel:'ROE: ' }),
+  'sec-nim':   () => drawNimChart(),
+  'sec-cti':   () => drawBarChart('#chart-cti',  'cti',  { suffix:'%', decimals:1, benchmark:48, benchmarkLabel:'Big-4 avg', xLabel:'Cost-to-Income (%) — lower is better', tipLabel:'C/I: ' }),
+  'sec-cet1':  () => drawBarChart('#chart-cet1', 'cet1', { suffix:'%', decimals:1, benchmark:10.25, benchmarkLabel:'APRA min', xLabel:'CET1 Capital Ratio (%)', xMin:9, xMax:14, tipLabel:'CET1: ' }),
+  'sec-radar': () => drawRadar()
+};
+
+const animationsTriggered = {};
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const id = entry.target.id;
+    if (entry.isIntersecting && !animationsTriggered[id]) {
+      entry.target.classList.add('in');
+      const builder = chartBuilders[id];
+      if (builder) {
+        // build chart immediately, then run the animation function it returns
+        const animate = builder();
+        // small delay so reveal-section transition can begin
+        setTimeout(() => animate && animate(), 250);
+      }
+      animationsTriggered[id] = true;
+    }
+  });
+}, { threshold: 0.18 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// also pre-build the first one if it's already in viewport on load
+window.addEventListener('load', () => {
+  const first = document.getElementById('sec-roe');
+  if (first && first.getBoundingClientRect().top < window.innerHeight) {
+    first.classList.add('in');
+    if (!animationsTriggered['sec-roe']) {
+      const animate = chartBuilders['sec-roe']();
+      setTimeout(() => animate && animate(), 250);
+      animationsTriggered['sec-roe'] = true;
+    }
+  }
+});
+
+// redraw radar on resize so it stays well-scaled (others use viewBox so scale fine)
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (animationsTriggered['sec-radar']) {
+      const animate = drawRadar();
+      animate && animate();
+    }
+  }, 200);
+});
+</script>
+</body>
+</html>
